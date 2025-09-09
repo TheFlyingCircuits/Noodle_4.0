@@ -14,9 +14,10 @@ import frc.robot.subsystems.Leds;
 import frc.robot.subsystems.drivetrain.Drivetrain;
 import frc.robot.subsystems.drivetrain.GyroIOPigeon;
 import frc.robot.subsystems.drivetrain.GyroIOSim;
-import frc.robot.subsystems.drivetrain.SwerveModuleIOKraken;
+import frc.robot.subsystems.drivetrain.SwerveModuleIONeo;
 import frc.robot.subsystems.drivetrain.SwerveModuleIOSim;
 import frc.robot.subsystems.vision.VisionIO;
+import frc.robot.subsystems.vision.VisionIOPhotonLib;
 
 
 
@@ -37,13 +38,13 @@ public class RobotContainer {
         /**** INITIALIZE SUBSYSTEMS ****/
         if (RobotBase.isReal()) {
             // NOODLE OFFSETS: FL -0.184814453125, FR 0.044677734375, BL -0.3349609375, BR 0.088134765625 
-            drivetrain = new Drivetrain( 
-                new GyroIOPigeon(),
-                new SwerveModuleIOKraken(0, 1, -0.377686, 0, "FL"), 
-                new SwerveModuleIOKraken(2, 3, 0.397705, 1, "FR"),
-                new SwerveModuleIOKraken(4, 5, 0.238281, 2, "BL"),
-                new SwerveModuleIOKraken(6, 7,  -0.370850, 3, "BR"),
-                new VisionIO() {} //VisionConstants.useNewSingleTagCodeFromBuckeye ? new VisionIO() {} : new VisionIOPhotonLib()
+        drivetrain = new Drivetrain( // fr 0.092041015625, br , 0.0419921875, fl -0.178955078125, bl -0.332763671875
+            new GyroIOPigeon(),
+            new SwerveModuleIONeo(7, 8, -0.184814453125, 0), 
+            new SwerveModuleIONeo(5, 6, 0.044677734375, 3),
+            new SwerveModuleIONeo(3, 4, -0.3349609375, 2),
+            new SwerveModuleIONeo(1, 2,  0.088134765625, 1),
+            new VisionIOPhotonLib()
             );
 
             leds = new Leds();

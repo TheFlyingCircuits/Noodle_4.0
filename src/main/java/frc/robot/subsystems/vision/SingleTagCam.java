@@ -167,24 +167,6 @@ public class SingleTagCam {
         Logger.recordOutput("tagCamAgree/"+tagCam.getName()+"/yawDegrees", Units.radiansToDegrees(camPose_robotFrame.getRotation().getZ()));
     }
 
-    public void makeTagCamsAgree() {
-        int tagID = (int)SmartDashboard.getNumber("tagCamsAgree/Face", 9);
-        SmartDashboard.putNumber("tagCamsAgree/Face", tagID);
-        Pose2d calibrationFace = VisionConstants.aprilTagFieldLayout.getTagPose(tagID).get().toPose2d();
 
-        double inchesBack = SmartDashboard.getNumber("tagCamsAgree/inchesBack", 10.1);
-        SmartDashboard.putNumber("tagCamsAgree/inchesBack", inchesBack);
-        double metersBack = Units.inchesToMeters(inchesBack);
-        double pushOutDistanceMeters = metersBack + (DrivetrainConstants.frameWidthMeters/2.0);
-
-        boolean facingReef = SmartDashboard.getBoolean("tagCamsAgree/facingReef", true);
-        SmartDashboard.putBoolean("tagCamsAgree/facingReef", facingReef);
-        Rotation2d rotationFromFace = facingReef ? Rotation2d.k180deg : Rotation2d.kZero;
-
-        Transform2d offset = new Transform2d(pushOutDistanceMeters, 0, rotationFromFace);
-        Logger.recordOutput("vision/calibrationPose", calibrationFace.plus(offset));
-
-        this.makeTagCamsAgree(calibrationFace.plus(offset));
-    }
 }
 

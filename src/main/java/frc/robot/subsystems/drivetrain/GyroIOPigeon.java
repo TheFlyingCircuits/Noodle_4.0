@@ -18,7 +18,7 @@ public class GyroIOPigeon implements GyroIO {
 
     public GyroIOPigeon() {
 
-        pigeon = new Pigeon2(GyroConstants.pigeonID, UniversalConstants.canivoreName);
+        pigeon = new Pigeon2(GyroConstants.pigeonID);
         configPigeon();
 
         xAccelFilter = LinearFilter.movingAverage(12);

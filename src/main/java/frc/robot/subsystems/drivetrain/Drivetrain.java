@@ -3,7 +3,9 @@ package frc.robot.subsystems.drivetrain;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+
 import org.littletonrobotics.junction.Logger;
+
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
@@ -30,6 +32,7 @@ import frc.robot.subsystems.vision.SingleTagPoseObservation;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIO.VisionIOInputsLogged;
 
+
 public class Drivetrain extends SubsystemBase {
 
     private GyroIO gyroIO;
@@ -38,10 +41,6 @@ public class Drivetrain extends SubsystemBase {
     private VisionIO visionIO;
     private VisionIOInputsLogged visionInputs;
     private SingleTagCam[] tagCams = {
-        new SingleTagCam(VisionConstants.tagCameraNames[0], VisionConstants.tagCameraTransforms[0]), // front left
-        new SingleTagCam(VisionConstants.tagCameraNames[1], VisionConstants.tagCameraTransforms[1]), // front right
-        new SingleTagCam(VisionConstants.tagCameraNames[2], VisionConstants.tagCameraTransforms[2]), // back left
-        new SingleTagCam(VisionConstants.tagCameraNames[3], VisionConstants.tagCameraTransforms[3])  // back right
     };
 
 

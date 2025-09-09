@@ -8,8 +8,10 @@ import com.pathplanner.lib.path.PathConstraints;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.util.Units;
 
@@ -30,7 +32,7 @@ public final class Constants {
         public final static double gravityMetersPerSecondSquared = 9.81;
         public final static double defaultPeriodSeconds = 0.02;
 
-        public final static String canivoreName = "CTRENetwork";
+        // public final static String canivoreName = "CTRENetwork";
 
         public enum Direction {
             left,
@@ -76,6 +78,10 @@ public final class Constants {
                 Math.hypot(trackwidthMeters / 2.0, wheelbaseMeters / 2.0);
         public static final double maxDesiredAngularVelocityRadiansPerSecond = 5.4;
 
+        public static final double frameWidthMeters = Units.inchesToMeters(27);
+        // TODO: get real values for framWidth and bumperWidth
+        public static final double bumperWidthMeters = Units.inchesToMeters(27 + 7);
+
         public static final double maxDesiredDriverAccel = 27.27;
         public static final PathConstraints pathfindingConstraints = new PathConstraints(
                 1.0, 1.0,
@@ -95,6 +101,12 @@ public final class Constants {
       /** Rotations of the steering column per rotations of the angle motor. */
       public static final double steerGearReduction = (14.0 / 50.0) * (10.0 / 60.0);
 
+        public static final int angleContinuousCurrentLimit = 50;
+        public static final boolean angleInvert = true;
+
+        public static final int driveContinuousCurrentLimit = 60;
+        public static final boolean driveInvert = true;
+
       // The wheels have a 2 inch radius, but sink into the capet about (1/16) of an inch.
       // As an estimate, the wheel radius is Units.inchesToMeters(2.-1./16.), or 0.0492m
       public static final double wheelRadiusMeters = 0.04946; //use MeasureWheelDiameter for this!
@@ -112,6 +124,8 @@ public final class Constants {
       public static final double drivekSVolts = 0.2383;
       public static final double drivekVVoltsSecondsPerMeter = 2.2859;
       public static final double drivekAVoltsSecondsSquaredPerMeter = 0.;
+
+      
     }
 
     public final static class GyroConstants {
@@ -131,6 +145,10 @@ public final class Constants {
         public final static String[] tagCameraNames = {
 
         };
+        public final static Transform3d robotToCoralCamera = new Transform3d(
+            new Translation3d(Units.inchesToMeters(-9.75), Units.inchesToMeters(5.5), Units.inchesToMeters(26.)),
+            new Rotation3d(0, Math.toRadians(19), Math.toRadians(-12))
+        );
 
         public final static Transform3d[] tagCameraTransforms = {
 
