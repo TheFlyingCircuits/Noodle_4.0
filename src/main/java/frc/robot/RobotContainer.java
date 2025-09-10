@@ -17,7 +17,6 @@ import frc.robot.subsystems.drivetrain.GyroIOSim;
 import frc.robot.subsystems.drivetrain.SwerveModuleIONeo;
 import frc.robot.subsystems.drivetrain.SwerveModuleIOSim;
 import frc.robot.subsystems.vision.VisionIO;
-import frc.robot.subsystems.vision.VisionIOPhotonLib;
 
 
 
@@ -43,8 +42,7 @@ public class RobotContainer {
             new SwerveModuleIONeo(7, 8, -0.184814453125, 0), 
             new SwerveModuleIONeo(5, 6, 0.044677734375, 3),
             new SwerveModuleIONeo(3, 4, -0.3349609375, 2),
-            new SwerveModuleIONeo(1, 2,  0.088134765625, 1),
-            new VisionIOPhotonLib()
+            new SwerveModuleIONeo(1, 2,  0.088134765625, 1)
             );
 
             leds = new Leds();
@@ -55,8 +53,7 @@ public class RobotContainer {
                 new SwerveModuleIOSim(){},
                 new SwerveModuleIOSim(){},
                 new SwerveModuleIOSim(){},
-                new SwerveModuleIOSim(){},
-                new VisionIO() {}
+                new SwerveModuleIOSim(){}
             );
 
 

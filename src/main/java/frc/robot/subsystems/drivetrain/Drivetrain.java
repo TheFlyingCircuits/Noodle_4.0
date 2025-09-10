@@ -1,9 +1,5 @@
 package frc.robot.subsystems.drivetrain;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-
 import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.Matrix;
@@ -25,12 +21,9 @@ import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.DrivetrainConstants;
-import frc.robot.Constants.VisionConstants;
+import frc.robot.LimelightHelpers.LimelightResults;
 import frc.robot.FlyingCircuitUtils;
-import frc.robot.subsystems.vision.SingleTagCam;
-import frc.robot.subsystems.vision.SingleTagPoseObservation;
-import frc.robot.subsystems.vision.VisionIO;
-import frc.robot.subsystems.vision.VisionIO.VisionIOInputsLogged;
+import frc.robot.LimelightHelpers;
 
 
 public class Drivetrain extends SubsystemBase {
@@ -38,10 +31,7 @@ public class Drivetrain extends SubsystemBase {
     private GyroIO gyroIO;
     private GyroIOInputsAutoLogged gyroInputs;
 
-    private VisionIO visionIO;
-    private VisionIOInputsLogged visionInputs;
-    private SingleTagCam[] tagCams = {
-    };
+    private GyroIOPigeon pigeon = new GyroIOPigeon();
 
 
     private boolean fullyTrustVisionNextPoseUpdate = false;
@@ -61,14 +51,10 @@ public class Drivetrain extends SubsystemBase {
         SwerveModuleIO flSwerveModuleIO, 
         SwerveModuleIO frSwerveModuleIO, 
         SwerveModuleIO blSwerveModuleIO, 
-        SwerveModuleIO brSwerveModuleIO,
-        VisionIO visionIO
+        SwerveModuleIO brSwerveModuleIO
     ) {
         this.gyroIO = gyroIO;
         gyroInputs = new GyroIOInputsAutoLogged();
-
-        this.visionIO = visionIO;
-        visionInputs = new VisionIOInputsLogged();
 
         swerveModules = new SwerveModule[] {
             new SwerveModule(flSwerveModuleIO, 0, "frontLeft"),
@@ -247,73 +233,27 @@ public class Drivetrain extends SubsystemBase {
         fusedPoseEstimator.update(gyroInputs.robotYawRotation2d, getModulePositions());
         wheelsOnlyPoseEstimator.update(gyroInputs.robotYawRotation2d, getModulePositions());
 
-        // get all pose observations from each camera
-        List<SingleTagPoseObservation> allFreshPoseObservations = new ArrayList<>();
-        for (SingleTagCam tagCam : tagCams) {
-            allFreshPoseObservations.addAll(tagCam.getFreshPoseObservations());
+        LimelightHelpers.SetRobotOrientation("limelight", fusedPoseEstimator.getEstimatedPosition().getRotation().getDegrees(), 0, 0, 0, 0, 0);
+        LimelightHelpers.PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight");
+   
+        // if our angular velocity is greater than 360 degrees per second, ignore vision updates
+        boolean doRejectUpdate = false;
+        if(mt2.tagCount == 0)
+        {
+            doRejectUpdate = true;
         }
-
-        // process pose obvervations in chronological order
-        allFreshPoseObservations.sort(new Comparator<SingleTagPoseObservation>() {
-            public int compare(SingleTagPoseObservation a, SingleTagPoseObservation b) {
-                return Double.compare(a.timestampSeconds(), b.timestampSeconds());
-            } 
-        });
-
-        // Filter tags
-        List<Pose3d> acceptedTags = new ArrayList<>();
-        List<Pose3d> rejectedTags = new ArrayList<>();
-        for (SingleTagPoseObservation poseObservation : allFreshPoseObservations) {
-
-            Translation2d observedLocation = poseObservation.robotPose().getTranslation().toTranslation2d();
-            Translation2d locationNow = getPoseMeters().getTranslation();
-
-            // reject tags that are too far away
-            if (poseObservation.tagToCamMeters() > 5) {
-                rejectedTags.add(poseObservation.getTagPose());
-                continue;
-            }
-
-            // reject tags that are too ambiguous
-            if (poseObservation.ambiguity() > 0.2) {
-                rejectedTags.add(poseObservation.getTagPose());
-                continue;
-            }
-
-            // Don't allow the robot to teleport. Disallowing teleports can cause problems when we get bumped
-            // and experience lots of wheel slip, which is why we have the "allowTeleportsNextPoseUpdate" flag
-            // (used at driver's discretion (typically via y-button)).
-            double teleportToleranceMeters = 4.0;
-            if (observedLocation.getDistance(locationNow) > teleportToleranceMeters && (!this.allowTeleportsNextPoseUpdate)) {
-                rejectedTags.add(poseObservation.getTagPose());
-                continue;
-            }
-
-            // Don't use any tag that isn't on the reef
-            if (!poseObservation.usesReefTag()) {
-                rejectedTags.add(poseObservation.getTagPose());
-                continue;
-            }
-
-            // This measurment passes all our checks, so we add it to the fusedPoseEstimator
-            acceptedTags.add(poseObservation.getTagPose());
-            Matrix<N3, N1> stdDevs = this.fullyTrustVisionNextPoseUpdate ? VecBuilder.fill(0, 0, 0) : poseObservation.getStandardDeviations();
-
+        if(!doRejectUpdate)
+        {
+            fusedPoseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(.7,.7,9999999));
             fusedPoseEstimator.addVisionMeasurement(
-                poseObservation.robotPose().toPose2d(), 
-                poseObservation.timestampSeconds(), 
-                stdDevs
-            );
+                mt2.pose,
+                mt2.timestampSeconds);
         }
 
         // reset flags for next time
         this.fullyTrustVisionNextPoseUpdate = false;
         this.allowTeleportsNextPoseUpdate = false;
-        this.hasAcceptablePoseObservationsThisLoop = acceptedTags.size() > 0;
 
-        // log the accepted and rejected tags
-        Logger.recordOutput("drivetrain/acceptedTags", acceptedTags.toArray(new Pose3d[0]));
-        Logger.recordOutput("drivetrain/rejectedTags", rejectedTags.toArray(new Pose3d[0]));
     }
 
     public Translation3d fieldCoordsFromRobotCoords(Translation3d robotCoords) {
@@ -354,7 +294,7 @@ public class Drivetrain extends SubsystemBase {
     @Override
     public void periodic() {
         gyroIO.updateInputs(gyroInputs);
-        visionIO.updateInputs(visionInputs);
+
         for (SwerveModule mod : swerveModules)
             mod.periodic();
 
@@ -363,7 +303,6 @@ public class Drivetrain extends SubsystemBase {
           
 
         Logger.processInputs("gyroInputs", gyroInputs);
-        Logger.processInputs("visionInputs", visionInputs);
 
         updatePoseEstimator();
         // ^^^ intakeCam.periodic() should come after updatePoseEstimator()
