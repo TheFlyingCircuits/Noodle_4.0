@@ -2,11 +2,12 @@ package frc.robot.subsystems.drivetrain;
 
 import org.littletonrobotics.junction.Logger;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform2d;
@@ -19,9 +20,10 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.DrivetrainConstants;
-import frc.robot.LimelightHelpers.LimelightResults;
 import frc.robot.FlyingCircuitUtils;
 import frc.robot.LimelightHelpers;
 
@@ -42,6 +44,12 @@ public class Drivetrain extends SubsystemBase {
 
     private SwerveDrivePoseEstimator fusedPoseEstimator;
     private SwerveDrivePoseEstimator wheelsOnlyPoseEstimator;
+
+    /** error measured in degrees, output is in degrees per second. */
+    private PIDController angleController;
+
+    /** error measured in meters, output is in meters per second. */
+    private PIDController translationController;
 
     /** used to rotate about the intake instead of the center of the robot */
     private Transform2d centerOfRotation_robotFrame = new Transform2d();
@@ -87,6 +95,18 @@ public class Drivetrain extends SubsystemBase {
             gyroInputs.robotYawRotation2d,
             getModulePositions(), 
             new Pose2d());
+
+
+        angleController = new PIDController(5, 0, 0.3); 
+        angleController.enableContinuousInput(-180, 180);
+        angleController.setTolerance(1); // degrees, degreesPerSecond.
+
+        translationController = new PIDController(3.75, 0, 0.1); // kP has units of metersPerSecond per meter of error.
+        translationController.setTolerance(0.02, 1.0); // meters, metersPerSecond
+
+        SmartDashboard.putData("drivetrain/angleController", angleController);
+        SmartDashboard.putData("drivetrain/translationController", translationController);
+
 
     }
 
@@ -146,6 +166,56 @@ public class Drivetrain extends SubsystemBase {
 
         return swerveStates;
     }
+
+    public void fieldOrientedDriveWhileAiming(ChassisSpeeds desiredTranslationalSpeeds, Rotation2d desiredAngle) {
+        // Use PID controller to generate a desired angular velocity based on the desired angle
+        double measuredAngle = getPoseMeters().getRotation().getDegrees();
+        double desiredAngleDegrees = desiredAngle.getDegrees();
+        double desiredDegreesPerSecond = angleController.calculate(measuredAngle, desiredAngleDegrees);
+        if (angleController.atSetpoint()) {
+            desiredDegreesPerSecond = 0;
+        }
+
+        ChassisSpeeds desiredSpeeds = new ChassisSpeeds(
+            desiredTranslationalSpeeds.vxMetersPerSecond,
+            desiredTranslationalSpeeds.vyMetersPerSecond,
+            Units.degreesToRadians(desiredDegreesPerSecond)
+        );
+
+        this.fieldOrientedDrive(desiredSpeeds, true);
+    }
+
+    public void pidToPose(Pose2d desired, double maxSpeedMetersPerSecond) {
+        Logger.recordOutput("drivetrain/pidSetpointMeters", desired);
+
+        Pose2d current = getPoseMeters();
+
+        Translation2d error = desired.getTranslation().minus(current.getTranslation());
+
+        Logger.recordOutput("drivetrain/pidErrorMeters", error);
+        
+        double pidOutputMetersPerSecond = -translationController.calculate(error.getNorm(), 0);
+
+
+        if (translationController.atSetpoint()) {
+            pidOutputMetersPerSecond = 0;
+        }
+
+        pidOutputMetersPerSecond = MathUtil.clamp(pidOutputMetersPerSecond, -maxSpeedMetersPerSecond, maxSpeedMetersPerSecond);
+
+        double xMetersPerSecond = pidOutputMetersPerSecond*error.getAngle().getCos();
+        double yMetersPerSecond = pidOutputMetersPerSecond*error.getAngle().getSin();
+        
+        fieldOrientedDriveWhileAiming(
+            new ChassisSpeeds(
+                xMetersPerSecond,
+                yMetersPerSecond,
+                0
+            ),
+            desired.getRotation()
+        );
+    }
+
 
 
     //**************** ODOMETRY / POSE ESTIMATION ****************/
@@ -233,22 +303,40 @@ public class Drivetrain extends SubsystemBase {
         fusedPoseEstimator.update(gyroInputs.robotYawRotation2d, getModulePositions());
         wheelsOnlyPoseEstimator.update(gyroInputs.robotYawRotation2d, getModulePositions());
 
-        LimelightHelpers.SetRobotOrientation("limelight", fusedPoseEstimator.getEstimatedPosition().getRotation().getDegrees(), 0, 0, 0, 0, 0);
-        LimelightHelpers.PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight");
+        LimelightHelpers.PoseEstimate mt1 = LimelightHelpers.getBotPoseEstimate_wpiBlue("limelight");
+        boolean doRejectUpdate = false;
+
+        if(mt1.tagCount == 1 && mt1.rawFiducials.length == 1)
+        {
+            if(mt1.rawFiducials[0].ambiguity > .7)
+            {
+            doRejectUpdate = true;
+            }
+            if(mt1.rawFiducials[0].distToCamera > 3)
+            {
+            doRejectUpdate = true;
+            }
+        }
+        Logger.recordOutput("LimelightEstimatedPose", mt1.pose);
    
         // if our angular velocity is greater than 360 degrees per second, ignore vision updates
-        boolean doRejectUpdate = false;
-        if(mt2.tagCount == 0)
+
+        // cam is 0.371475 up and 0.1043 forward in meters
+
+        if(mt1.tagCount == 0)
         {
             doRejectUpdate = true;
         }
         if(!doRejectUpdate)
         {
-            fusedPoseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(.7,.7,9999999));
+            Matrix<N3, N1> stdDevs = this.fullyTrustVisionNextPoseUpdate ? VecBuilder.fill(0, 0, 0) : VecBuilder.fill(.5,.5,9999999);
+            fusedPoseEstimator.setVisionMeasurementStdDevs(stdDevs);
             fusedPoseEstimator.addVisionMeasurement(
-                mt2.pose,
-                mt2.timestampSeconds);
+                mt1.pose,
+                mt1.timestampSeconds);
         }
+
+
 
         // reset flags for next time
         this.fullyTrustVisionNextPoseUpdate = false;
