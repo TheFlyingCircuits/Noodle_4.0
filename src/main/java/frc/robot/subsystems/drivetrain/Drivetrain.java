@@ -305,8 +305,8 @@ public class Drivetrain extends SubsystemBase {
 
         LimelightHelpers.PoseEstimate mt1 = LimelightHelpers.getBotPoseEstimate_wpiBlue("limelight");
         boolean doRejectUpdate = false;
-
-        if(mt1.tagCount == 1 && mt1.rawFiducials.length == 1)
+        if(mt1 != null) {
+            if(mt1.tagCount == 1 && mt1.rawFiducials.length == 1)
         {
             if(mt1.rawFiducials[0].ambiguity > .7)
             {
@@ -317,6 +317,11 @@ public class Drivetrain extends SubsystemBase {
             doRejectUpdate = true;
             }
         }
+        } 
+        else {
+            System.out.println("no mt1");
+        }
+        
         Logger.recordOutput("LimelightEstimatedPose", mt1.pose);
    
         // if our angular velocity is greater than 360 degrees per second, ignore vision updates

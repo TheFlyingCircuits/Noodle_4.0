@@ -70,9 +70,10 @@ public final class Constants {
                 new Translation2d(-wheelbaseMeters / 2.0, -trackwidthMeters / 2.0));
         public static final double maxDesiredTeleopAngularVelocityRadiansPerSecond = Units.rotationsToRadians(0.85);
          
-        public static final double maxAchievableVelocityMetersPerSecond = 5880.0 / 60.0 *
-        driveReduction *
-        wheelDiamaterMeters * Math.PI;
+        // public static final double maxAchievableVelocityMetersPerSecond = 5880.0 / 60.0 *
+        // driveReduction *
+        // wheelDiamaterMeters * Math.PI;
+        public static final double maxAchievableVelocityMetersPerSecond = 2.5;
         public static final double maxDesiredTeleopVelocityMetersPerSecond = 4.3;
         public static final double maxAchievableAngularVelocityRadiansPerSecond = maxAchievableVelocityMetersPerSecond /
                 Math.hypot(trackwidthMeters / 2.0, wheelbaseMeters / 2.0);
