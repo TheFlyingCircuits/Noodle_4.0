@@ -18,7 +18,6 @@ import frc.robot.subsystems.drivetrain.GyroIOPigeon;
 import frc.robot.subsystems.drivetrain.GyroIOSim;
 import frc.robot.subsystems.drivetrain.SwerveModuleIONeo;
 import frc.robot.subsystems.drivetrain.SwerveModuleIOSim;
-import frc.robot.subsystems.vision.VisionIO;
 
 
 
@@ -76,8 +75,9 @@ public class RobotContainer {
     private void realBindings() {
 
         duncanController.y().onTrue(new InstantCommand(() -> drivetrain.fullyTrustVisionNextPoseUpdate()));
+        duncanController.povUp().onTrue(Commands.runOnce(drivetrain::setRobotFacingForward));
 
-        duncanController.rightBumper().whileTrue(Commands.run(() -> drivetrain.pidToPose(null, 2)));
+        // duncanController.rightBumper().whileTrue(Commands.run(() -> drivetrain.pidToPose(null, 2)));
 
     }
     public void setDefaultCommands() {
