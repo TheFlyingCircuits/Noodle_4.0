@@ -1,5 +1,7 @@
 package frc.robot.subsystems.drivetrain;
 
+import java.util.Optional;
+
 import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.MathUtil;
@@ -26,6 +28,8 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.DrivetrainConstants;
 import frc.robot.FlyingCircuitUtils;
 import frc.robot.LimelightHelpers;
+import frc.robot.PlayingField.FieldElement;
+import frc.robot.PlayingField.ReefFace;
 
 
 public class Drivetrain extends SubsystemBase {
@@ -303,43 +307,43 @@ public class Drivetrain extends SubsystemBase {
         fusedPoseEstimator.update(gyroInputs.robotYawRotation2d, getModulePositions());
         wheelsOnlyPoseEstimator.update(gyroInputs.robotYawRotation2d, getModulePositions());
 
-        LimelightHelpers.PoseEstimate mt1 = LimelightHelpers.getBotPoseEstimate_wpiBlue("limelight");
+        Optional <LimelightHelpers.PoseEstimate> mt1Exists = Optional.ofNullable(LimelightHelpers.getBotPoseEstimate_wpiBlue("limelight"));
         boolean doRejectUpdate = false;
-        if(mt1 != null) {
-            if(mt1.tagCount == 1 && mt1.rawFiducials.length == 1)
-        {
-            if(mt1.rawFiducials[0].ambiguity > .7)
-            {
-            doRejectUpdate = true;
+        if(mt1Exists.get() != null) {
+            LimelightHelpers.PoseEstimate mt1 = mt1Exists.get();
+            if(mt1.tagCount == 1 && mt1.rawFiducials.length == 1) {   
+                if(mt1.rawFiducials[0].ambiguity > .7) {
+                doRejectUpdate = true;
+                }
+                if(mt1.rawFiducials[0].distToCamera > 3) {
+                doRejectUpdate = true;
+                }
             }
-            if(mt1.rawFiducials[0].distToCamera > 3)
+
+                    
+            Logger.recordOutput("LimelightEstimatedPose", mt1.pose);
+    
+            // if our angular velocity is greater than 360 degrees per second, ignore vision updates
+
+            // cam is 0.371475 up and 0.1043 forward in meters
+
+            if(mt1.tagCount == 0)
             {
-            doRejectUpdate = true;
+                doRejectUpdate = true;
             }
-        }
+            if(!doRejectUpdate)
+            {
+                Matrix<N3, N1> stdDevs = this.fullyTrustVisionNextPoseUpdate ? VecBuilder.fill(0, 0, 0) : VecBuilder.fill(.5,.5,9999999);
+                fusedPoseEstimator.setVisionMeasurementStdDevs(stdDevs);
+                fusedPoseEstimator.addVisionMeasurement(
+                    mt1.pose,
+                    mt1.timestampSeconds);
+            }
         } 
         else {
             System.out.println("no mt1");
         }
-        
-        Logger.recordOutput("LimelightEstimatedPose", mt1.pose);
-   
-        // if our angular velocity is greater than 360 degrees per second, ignore vision updates
 
-        // cam is 0.371475 up and 0.1043 forward in meters
-
-        if(mt1.tagCount == 0)
-        {
-            doRejectUpdate = true;
-        }
-        if(!doRejectUpdate)
-        {
-            Matrix<N3, N1> stdDevs = this.fullyTrustVisionNextPoseUpdate ? VecBuilder.fill(0, 0, 0) : VecBuilder.fill(.5,.5,9999999);
-            fusedPoseEstimator.setVisionMeasurementStdDevs(stdDevs);
-            fusedPoseEstimator.addVisionMeasurement(
-                mt1.pose,
-                mt1.timestampSeconds);
-        }
 
 
 
@@ -382,6 +386,28 @@ public class Drivetrain extends SubsystemBase {
         ChassisSpeeds v = getFieldOrientedVelocity();
         double s = Math.hypot(v.vxMetersPerSecond, v.vyMetersPerSecond);
         return s;
+    }
+
+        private FieldElement getClosestFieldElement(FieldElement[] fieldElements) {
+        // start by assuming the first is closest
+        FieldElement closest = fieldElements[0];
+        double minDistance = getPoseMeters().getTranslation().getDistance(closest.getLocation2d());
+
+        // see if any other than the first are closer
+        for (int i = 1; i < fieldElements.length; i += 1) {
+            FieldElement candidate = fieldElements[i];
+            double distance = getPoseMeters().getTranslation().getDistance(candidate.getLocation2d());
+
+            if (distance < minDistance) {
+                closest = candidate;
+                minDistance = distance;
+            }
+        }
+
+        return closest;
+    }
+    public ReefFace getClosestReefFace() {
+        return (ReefFace) this.getClosestFieldElement(FieldElement.ALL_REEF_FACES);
     }
 
     @Override
