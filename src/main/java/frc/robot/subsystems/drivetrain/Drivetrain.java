@@ -101,11 +101,11 @@ public class Drivetrain extends SubsystemBase {
             new Pose2d());
 
 
-        angleController = new PIDController(5, 0, 0.3); 
+        angleController = new PIDController(6, 0, 0.4); 
         angleController.enableContinuousInput(-180, 180);
         angleController.setTolerance(1); // degrees, degreesPerSecond.
 
-        translationController = new PIDController(3.75, 0, 0.1); // kP has units of metersPerSecond per meter of error.
+        translationController = new PIDController(4, 0, 0.15); // kP has units of metersPerSecond per meter of error.
         translationController.setTolerance(0.02, 1.0); // meters, metersPerSecond
 
         SmartDashboard.putData("drivetrain/angleController", angleController);
@@ -309,40 +309,45 @@ public class Drivetrain extends SubsystemBase {
 
         Optional <LimelightHelpers.PoseEstimate> mt1Exists = Optional.ofNullable(LimelightHelpers.getBotPoseEstimate_wpiBlue("limelight"));
         boolean doRejectUpdate = false;
-        if(mt1Exists.get() != null) {
-            LimelightHelpers.PoseEstimate mt1 = mt1Exists.get();
-            if(mt1.tagCount == 1 && mt1.rawFiducials.length == 1) {   
-                if(mt1.rawFiducials[0].ambiguity > .7) {
-                doRejectUpdate = true;
-                }
-                if(mt1.rawFiducials[0].distToCamera > 3) {
-                doRejectUpdate = true;
-                }
-            }
-
-                    
-            Logger.recordOutput("LimelightEstimatedPose", mt1.pose);
-    
-            // if our angular velocity is greater than 360 degrees per second, ignore vision updates
-
-            // cam is 0.371475 up and 0.1043 forward in meters
-
-            if(mt1.tagCount == 0)
-            {
-                doRejectUpdate = true;
-            }
-            if(!doRejectUpdate)
-            {
-                Matrix<N3, N1> stdDevs = this.fullyTrustVisionNextPoseUpdate ? VecBuilder.fill(0, 0, 0) : VecBuilder.fill(.5,.5,9999999);
-                fusedPoseEstimator.setVisionMeasurementStdDevs(stdDevs);
-                fusedPoseEstimator.addVisionMeasurement(
-                    mt1.pose,
-                    mt1.timestampSeconds);
-            }
-        } 
-        else {
-            System.out.println("no mt1");
+        try {
+            mt1Exists.get();
+        } catch (Exception NoSuchElementException) {
+            return;
         }
+            if(mt1Exists.get() != null) {
+                LimelightHelpers.PoseEstimate mt1 = mt1Exists.get();
+                if(mt1.tagCount == 1 && mt1.rawFiducials.length == 1) {   
+                    if(mt1.rawFiducials[0].ambiguity > .7) {
+                    doRejectUpdate = true;
+                    }
+                    if(mt1.rawFiducials[0].distToCamera > 3) {
+                    doRejectUpdate = true;
+                    }
+                }
+
+                        
+                Logger.recordOutput("LimelightEstimatedPose", mt1.pose);
+        
+                // if our angular velocity is greater than 360 degrees per second, ignore vision updates
+
+                // cam is 0.371475 up and 0.1043 forward in meters
+
+                if(mt1.tagCount == 0)
+                {
+                    doRejectUpdate = true;
+                }
+                if(!doRejectUpdate)
+                {
+                    Matrix<N3, N1> stdDevs = this.fullyTrustVisionNextPoseUpdate ? VecBuilder.fill(0, 0, 0) : VecBuilder.fill(.5,.5,9999999);
+                    fusedPoseEstimator.setVisionMeasurementStdDevs(stdDevs);
+                    fusedPoseEstimator.addVisionMeasurement(
+                        mt1.pose,
+                        mt1.timestampSeconds);
+                }
+            } 
+            else {
+                System.out.println("no mt1");
+            }
 
 
 

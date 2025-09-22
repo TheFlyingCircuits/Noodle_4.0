@@ -108,6 +108,6 @@ public class RobotContainer {
     }
 
     private Command lineUpWithClosestFace() {
-        return Commands.run (() -> drivetrain.pidToPose(drivetrain.getClosestReefFace().getPose2d().plus(new Transform2d(0,1,new Rotation2d())),2));
+        return Commands.run (() -> drivetrain.pidToPose(drivetrain.getClosestReefFace().getPose2d().plus(new Transform2d(0.5,0,Rotation2d.k180deg)),2));
     }
 }
