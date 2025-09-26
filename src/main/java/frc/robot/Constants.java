@@ -158,6 +158,13 @@ public final class Constants {
 
     }
 
+    public final static class IntakeConstants {
+        public final static int leftPivotNeoID = 0;
+        public final static int rightPivotNeoID = 0;
+        public final static int leftGripperNeoID = 0;
+        public final static int rightGripperNeoID = 0;
+    }
+
 
     public final static class LEDConstants {
         public final static int ledPWMPort = 0;
