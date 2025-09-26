@@ -6,7 +6,7 @@ public interface IntakeIO {
     @AutoLog
     public class IntakeIOInputs {
         public double pivotAngleDegrees = 0;
-        public double pivotAngleDegreesPerSecond = 0;
+        public double pivotVelocityDegreesPerSecond = 0;
         public double pivotAppliedVolts = 0;
         public double pivotAmps = 0;
 

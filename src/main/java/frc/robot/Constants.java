@@ -163,6 +163,8 @@ public final class Constants {
         public final static int rightPivotNeoID = 0;
         public final static int leftGripperNeoID = 0;
         public final static int rightGripperNeoID = 0;
+
+        public final static int pivotGearRatio = 1/1; // TODO: change for real robot
     }
 
 
