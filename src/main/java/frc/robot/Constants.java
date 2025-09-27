@@ -164,9 +164,23 @@ public final class Constants {
         public final static int leftGripperNeoID = 0;
         public final static int rightGripperNeoID = 0;
 
-        public final static int pivotGearRatio = 1/1; // TODO: change for real robot
-    }
+        public final static int pivotGearReduction = 1/2; // TODO: change for real robot, also make sure it is a fraction or decimal
 
+        public final static double kSPivotVolts = 0;
+        public final static double kGPivotVolts = 0;
+        public final static double kVPivotVoltsSecondsPerRadian = 0;
+        public final static double kAPivotVoltsSecondsSquaredPerRadian = 0;
+
+        //in deg bc simplier and feedforward in the end just outputs a voltage so we can use rad for that and deg for this
+        public final static double kPPivotVoltsPerRadian = 0;
+        public final static double kDPivotVoltsPerRadianPerSecond = 0;
+
+        // neo max free spinning speed at nominal voltage is 5820 rpm
+        // this is theoretical max velocity
+        public final static double maxPivotVelocityRadianPerSecond = 2*Math.PI * (5820/60) * pivotGearReduction; // make rpm rps by /60 then div by gear ratio then converting it to radians by 2pi*
+        public final static double maxPivotAccelerationRadianPerSecondSquared = 0; // idk will get slope of velocity vs time graph on real mechanism running at nominal voltage
+        
+    }
 
     public final static class LEDConstants {
         public final static int ledPWMPort = 0;

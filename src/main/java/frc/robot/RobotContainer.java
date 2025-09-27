@@ -22,7 +22,6 @@ import frc.robot.subsystems.drivetrain.SwerveModuleIONeo;
 import frc.robot.subsystems.drivetrain.SwerveModuleIOSim;
 
 
-
 public class RobotContainer {
 
     protected final HumanDriver duncan = new HumanDriver(0);
@@ -58,7 +57,6 @@ public class RobotContainer {
                 new SwerveModuleIOSim(){},
                 new SwerveModuleIOSim(){}
             );
-
 
             leds = new Leds();
         }
