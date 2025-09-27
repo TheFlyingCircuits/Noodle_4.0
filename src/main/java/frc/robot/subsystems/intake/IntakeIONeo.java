@@ -22,7 +22,6 @@ public class IntakeIONeo implements IntakeIO {
         configMotors();
     }
 
-
     private void configMotors() {
 
         // Pivot Config
@@ -68,11 +67,18 @@ public class IntakeIONeo implements IntakeIO {
     public void setPivotVolts(double volts) {
         pivotNeo.setVoltage(volts);
     }
-        
+
+    @Override
+    public void setPivotPosition(double positionDegrees) {
+        pivotNeo.setPosition(positionDegrees);
+    }
+
+    @Override
     public void setTopGripperVolts(double volts) {
         topGripperNeo.setVoltage(volts);
     }
 
+    @Override
     public void setBottomGripperVolts(double volts) {
         bottomGripperNeo.setVoltage(volts);
     }
