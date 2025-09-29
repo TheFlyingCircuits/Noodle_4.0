@@ -30,6 +30,7 @@ public class Intake extends SubsystemBase {
     public Intake(IntakeIO io) {
         this.io = io;
         inputs = new IntakeIOInputsAutoLogged();
+        timer = new Timer();
 
         pivotFeedForward = new ArmFeedforward(IntakeConstants.kSPivotVolts, IntakeConstants.kGPivotVolts,IntakeConstants.kVPivotVoltsSecondsPerRadian, IntakeConstants.kAPivotVoltsSecondsSquaredPerRadian);
         pivotProfiledPID = new ProfiledPIDController(IntakeConstants.kPPivotVoltsPerRadian, 0, IntakeConstants.kDPivotVoltsPerRadianPerSecond, 
@@ -41,9 +42,11 @@ public class Intake extends SubsystemBase {
     public void periodic() {
         io.updateInputs(inputs);
 
+        Logger.processInputs("intakeInputs", inputs);
+
         goToDesiredPivotAngle();
 
-        Logger.recordOutput("intake/desiredPivotAngleDegrees", desiredPivotAngleDegrees);
+        Logger.recordOutput("intakeInputs/desiredPivotAngleDegrees", desiredPivotAngleDegrees);
     }
 
     public void setPivotVolts(double volts) {

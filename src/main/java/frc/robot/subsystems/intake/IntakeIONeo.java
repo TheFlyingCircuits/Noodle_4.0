@@ -32,8 +32,8 @@ public class IntakeIONeo implements IntakeIO {
         gipperConfig.inverted(true); // TODO: set real inversion
         // set to in deg by multipling the 1 rotation by 360 deg/gear ratio, 1*(360/gearRatio)
         
-        pivotConfig.encoder.positionConversionFactor(360/IntakeConstants.pivotGearReduction)
-            .velocityConversionFactor(360/60/IntakeConstants.pivotGearReduction); // same thing for velocity but bc vel is deg/sec div by 60 seconds
+        pivotConfig.encoder.positionConversionFactor(360.0*IntakeConstants.pivotGearReduction)
+            .velocityConversionFactor(360.0/60.0*IntakeConstants.pivotGearReduction); // same thing for velocity but bc vel is deg/sec div by 60 seconds
 
         pivotNeo.configure(pivotConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
@@ -52,7 +52,7 @@ public class IntakeIONeo implements IntakeIO {
     public void updateInputs(IntakeIOInputs inputs) {
         inputs.pivotAngleDegrees = pivotNeo.getPosition();
         inputs.pivotAngleRadians = Units.degreesToRadians(inputs.pivotAngleDegrees);
-        inputs.pivotVelocityDegreesPerSecond  = pivotNeo.getVelocity();
+        inputs.pivotVelocityDegreesPerSecond = pivotNeo.getVelocity();
         inputs.pivotAppliedVolts = pivotNeo.getAppliedOutput()*pivotNeo.getBusVoltage();
         inputs.pivotAmps = pivotNeo.getOutputCurrent();
 

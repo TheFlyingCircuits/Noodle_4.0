@@ -165,7 +165,7 @@ public final class Constants {
         public final static int rightGripperNeoID = 3;
 
         public final static double maxPivotAngleDegrees = 160;
-        public final static double minPivotAngleDegrees = 0;
+        public final static double minPivotAngleDegrees = -1;
 
 
         // filler value with a 50:1 gear reduction

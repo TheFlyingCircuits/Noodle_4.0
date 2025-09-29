@@ -20,6 +20,8 @@ import frc.robot.subsystems.drivetrain.GyroIOPigeon;
 import frc.robot.subsystems.drivetrain.GyroIOSim;
 import frc.robot.subsystems.drivetrain.SwerveModuleIONeo;
 import frc.robot.subsystems.drivetrain.SwerveModuleIOSim;
+import frc.robot.subsystems.intake.Intake;
+import frc.robot.subsystems.intake.IntakeIOSim;
 
 
 public class RobotContainer {
@@ -32,6 +34,7 @@ public class RobotContainer {
 
     public final Drivetrain drivetrain;
     public final Leds leds;
+    public final Intake intake;
   
     
     public RobotContainer() {
@@ -48,6 +51,7 @@ public class RobotContainer {
             );
 
             leds = new Leds();
+            intake = new Intake(new IntakeIOSim(drivetrain));
         }
         else {
             drivetrain = new Drivetrain(
@@ -59,6 +63,8 @@ public class RobotContainer {
             );
 
             leds = new Leds();
+            intake = new Intake(new IntakeIOSim(drivetrain));
+
         }
 
         setDefaultCommands();
@@ -78,6 +84,8 @@ public class RobotContainer {
         duncanController.povUp().onTrue(Commands.runOnce(drivetrain::setRobotFacingForward));
 
         duncanController.rightBumper().whileTrue(lineUpWithClosestFace());
+
+        duncanController.x().whileTrue(intake.setTargetAngleDegCommand(0.0)).onFalse(intake.setTargetAngleDegCommand(90.0));
 
 
     }
