@@ -19,7 +19,7 @@ public class Intake extends SubsystemBase {
 
     ProfiledPIDController pivotProfiledPID; // in radians
 
-    public double desiredPivotAngleDegrees;
+    public double desiredPivotAngleDegrees = 90;
 
     Timer timer;
 
@@ -50,6 +50,7 @@ public class Intake extends SubsystemBase {
     }
 
     public void setPivotVolts(double volts) {
+        System.out.println(volts);
         io.setPivotVolts(volts);
     }
 
@@ -77,6 +78,11 @@ public class Intake extends SubsystemBase {
 
         lastLoopTime = timer.get();
         lastLoopVelocityRadPerSec = profileSetpointVelRadPerSec;
+
+        // System.out.println(desiredPivotAngleDegrees + " deg");
+        System.out.println(profilePIDOutputVolts + feedForwardVolts);
+
+        
 
         setPivotVolts(profilePIDOutputVolts + feedForwardVolts);
     }
