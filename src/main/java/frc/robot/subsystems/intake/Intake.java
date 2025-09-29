@@ -40,17 +40,18 @@ public class Intake extends SubsystemBase {
 
     @Override
     public void periodic() {
+
+        inputs.desiredPivotAngleDeg = desiredPivotAngleDegrees;
         io.updateInputs(inputs);
 
         Logger.processInputs("intakeInputs", inputs);
 
         goToDesiredPivotAngle();
 
-        Logger.recordOutput("intakeInputs/desiredPivotAngleDegrees", desiredPivotAngleDegrees);
     }
 
     public void setPivotVolts(double volts) {
-        System.out.println(volts);
+        // System.out.println(volts);
         io.setPivotVolts(volts);
     }
 
@@ -69,7 +70,8 @@ public class Intake extends SubsystemBase {
     }
 
     public void goToDesiredPivotAngle() {
-        double profilePIDOutputVolts = pivotProfiledPID.calculate(inputs.pivotAngleRadians, Units.degreesToRadians(desiredPivotAngleDegrees));
+        System.out.println(inputs.pivotAngleRadians);
+        double profilePIDOutputVolts = pivotProfiledPID.calculate(Units.degreesToRadians(desiredPivotAngleDegrees) - inputs.pivotAngleRadians, 0);
         // we use .calculate for that and .setpoint for feed forward because .setpoint is where it should be on the profile but .calculate includes pid and is in volts
         double profileSetpointVelRadPerSec = pivotProfiledPID.getSetpoint().velocity;
         // get acceleration by delta velcocity from thisloop-last loop divided by delta time from thislooptime-lastlooptime
@@ -80,7 +82,7 @@ public class Intake extends SubsystemBase {
         lastLoopVelocityRadPerSec = profileSetpointVelRadPerSec;
 
         // System.out.println(desiredPivotAngleDegrees + " deg");
-        System.out.println(profilePIDOutputVolts + feedForwardVolts);
+        // System.out.println(profilePIDOutputVolts + feedForwardVolts);
 
         
 

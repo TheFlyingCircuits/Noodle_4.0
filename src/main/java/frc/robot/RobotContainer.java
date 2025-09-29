@@ -87,7 +87,7 @@ public class RobotContainer {
 
         duncanController.rightBumper().whileTrue(lineUpWithClosestFace());
 
-        duncanController.x().whileTrue(intake.setTargetAngleDegCommand(0.0)).onFalse(intake.setTargetAngleDegCommand(90.0));
+        duncanController.x().whileTrue(intake.setTargetAngleDegCommand(0.0)).whileFalse(intake.setTargetAngleDegCommand(90.0));
 
         duncanController.b().whileTrue(intake.setPivotVoltsCommand(2));
 

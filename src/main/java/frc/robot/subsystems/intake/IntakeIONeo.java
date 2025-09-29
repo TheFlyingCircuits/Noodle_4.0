@@ -34,7 +34,7 @@ public class IntakeIONeo implements IntakeIO {
         
         pivotConfig.encoder.positionConversionFactor(360.0*IntakeConstants.pivotGearReduction)
             .velocityConversionFactor(360.0/60.0*IntakeConstants.pivotGearReduction); // same thing for velocity but bc vel is deg/sec div by 60 seconds
-
+        
         pivotNeo.configure(pivotConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
         // Gipper config

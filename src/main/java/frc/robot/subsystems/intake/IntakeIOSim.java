@@ -61,7 +61,7 @@ public class IntakeIOSim implements IntakeIO{
         }
         pivotSim.setInputVoltage(volts);
 
-        pivotVelDegPerSec = volts * 10.0; // volts to deg
+        pivotVelDegPerSec = volts * 30.0; // volts to deg
     }
 
     @Override

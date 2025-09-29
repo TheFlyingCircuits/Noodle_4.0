@@ -12,6 +12,7 @@ public interface IntakeIO {
         public double pivotVelocityDegreesPerSecond = 0.0;
         public double pivotAppliedVolts = 0.0;
         public double pivotAmps = 0.0;
+        public double desiredPivotAngleDeg = 90.0;
 
         public double topGripperAppliedVolts = 0.0;
         public double topGripperAmps = 0.0;
