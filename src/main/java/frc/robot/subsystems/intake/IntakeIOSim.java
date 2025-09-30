@@ -43,7 +43,9 @@ public class IntakeIOSim implements IntakeIO{
         // System.out.println(inputs.pivotAngleDegrees);
         inputs.pivotVelocityDegreesPerSecond = pivotVelDegPerSec;
 
-        Translation2d intakeTranslation2d = drivetrain.getPoseMeters().getTranslation().plus(new Translation2d(0.4,0));
+        double robotYawRad = drivetrain.getPoseMeters().getRotation().getRadians();
+
+        Translation2d intakeTranslation2d = drivetrain.getPoseMeters().getTranslation().plus(new Translation2d(Math.cos(robotYawRad)* 0.4,Math.sin(robotYawRad)*0.4));
 
         Pose3d intakePoseOnRobotSIM = new Pose3d(new Translation3d(intakeTranslation2d.getX(),intakeTranslation2d.getY(),0.3), 
             new Rotation3d(0,-inputs.pivotAngleRadians,drivetrain.getPoseMeters().getRotation().getRadians()));
@@ -54,11 +56,11 @@ public class IntakeIOSim implements IntakeIO{
     @Override
     public void setPivotVolts(double volts) {
 
-        if ((volts > -0.1) && (volts < 0.1)) {
-            pivotVelDegPerSec = 0;
-            pivotSim.setInputVoltage(0);
-            return;
-        }
+        // if ((volts > -0.1) && (volts < 0.1)) {
+        //     pivotVelDegPerSec = 0;
+        //     pivotSim.setInputVoltage(0);
+        //     return;
+        // }
         pivotSim.setInputVoltage(volts);
 
         pivotVelDegPerSec = volts * 45.0; // volts to deg

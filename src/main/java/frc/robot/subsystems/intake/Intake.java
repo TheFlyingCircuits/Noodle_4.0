@@ -72,9 +72,6 @@ public class Intake extends SubsystemBase {
 
     public void goToDesiredPivotAngle() {
         // System.out.println(-(Units.degreesToRadians(desiredPivotAngleDegrees) - inputs.pivotAngleRadians));
-        // pivotProfiledPID.setGoal(Units.degreesToRadians(desiredPivotAngleDegrees));
-        // double profilePIDOutputVolts = pivotProfiledPID.calculate(-(Units.degreesToRadians(desiredPivotAngleDegrees) - inputs.pivotAngleRadians),0);
-            // new TrapezoidProfile.State(Units.degreesToRadians(desiredPivotAngleDegrees), 0));
 
         double profilePIDOutputVolts = pivotProfiledPID.calculate(inputs.pivotAngleRadians,
             new TrapezoidProfile.State(Units.degreesToRadians(desiredPivotAngleDegrees), 0));
@@ -83,8 +80,8 @@ public class Intake extends SubsystemBase {
         double profileSetpointVelRadPerSec = pivotProfiledPID.getSetpoint().velocity;
         // get acceleration by delta velcocity from thisloop-last loop divided by delta time from thislooptime-lastlooptime
         double accelerationRadPerSecSquared = (profileSetpointVelRadPerSec - lastLoopVelocityRadPerSec) / (timer.get() - lastLoopTime); 
-        // double feedForwardVolts = pivotFeedForward.calculate(inputs.pivotAngleRadians, profileSetpointVelRadPerSec,accelerationRadPerSecSquared);
-        double feedForwardVolts = pivotFeedForward.calculate(inputs.pivotAngleRadians, profileSetpointVelRadPerSec);
+        double feedForwardVolts = pivotFeedForward.calculate(inputs.pivotAngleRadians, profileSetpointVelRadPerSec,accelerationRadPerSecSquared);
+        // double feedForwardVolts = pivotFeedForward.calculate(inputs.pivotAngleRadians, profileSetpointVelRadPerSec);
 
 
         lastLoopTime = timer.get();
@@ -92,11 +89,9 @@ public class Intake extends SubsystemBase {
 
         // System.out.println(inputs.pivotAngleRadians + " rad");
 
-        System.out.println(feedForwardVolts);
+        // System.out.println(feedForwardVolts);
 
-        
-
-        setPivotVolts(profilePIDOutputVolts);
+        setPivotVolts(profilePIDOutputVolts + feedForwardVolts);
     }
 
     public Command setTargetAngleDegCommand(double degrees) {
