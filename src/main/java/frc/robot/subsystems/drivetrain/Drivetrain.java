@@ -4,10 +4,18 @@ import java.util.Optional;
 
 import org.littletonrobotics.junction.Logger;
 
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.config.PIDConstants;
+import com.pathplanner.lib.config.RobotConfig;
+import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+import com.pathplanner.lib.util.DriveFeedforwards;
+import com.pathplanner.lib.util.PathPlannerLogging;
+
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -22,7 +30,9 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.DrivetrainConstants;
@@ -54,6 +64,10 @@ public class Drivetrain extends SubsystemBase {
 
     /** error measured in meters, output is in meters per second. */
     private PIDController translationController;
+
+
+    // in meters/sec
+    private ProfiledPIDController profiledController;
 
     /** used to rotate about the intake instead of the center of the robot */
     private Transform2d centerOfRotation_robotFrame = new Transform2d();
@@ -111,7 +125,65 @@ public class Drivetrain extends SubsystemBase {
         SmartDashboard.putData("drivetrain/angleController", angleController);
         SmartDashboard.putData("drivetrain/translationController", translationController);
 
+        profiledController = new ProfiledPIDController(2.8, 0, 0.125, new TrapezoidProfile.Constraints(
+            4, 4));
+        profiledController.setTolerance(0.01, 0.01);
 
+        configPathPlanner();
+    }
+
+    private void configPathPlanner() {
+
+        // Load the RobotConfig from the GUI settings. You should probably
+        // store this in your Constants file
+        RobotConfig config;
+        try{
+            config = RobotConfig.fromGUISettings();
+        } catch (Exception e) {
+            // Handle exception as needed
+            e.printStackTrace();
+            config = new RobotConfig(0, 0, null);
+        }
+
+        AutoBuilder.configure(
+            this::getPoseMeters, // Robot pose supplier
+            (Pose2d dummy) -> {}, // Method to reset odometry (will be called if your auto has a starting pose)
+                                  // Note: We never let PathPlanner set the pose, we always seed pose using cameras and apriltags.
+            () -> {return DrivetrainConstants.swerveKinematics.toChassisSpeeds(getModuleStates());}, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
+            (ChassisSpeeds speeds, DriveFeedforwards ff) -> {this.robotOrientedDrive(speeds, true);}, // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds
+            new PPHolonomicDriveController( // HolonomicPathFollowerConfig, this should likely live in your Constants class
+                    new PIDConstants(3.0, 0.0, 0.0), // Translation PID constants
+                    new PIDConstants(4.0, 0.0, 0.0) // Rotation PID constants // These are different from our angleController gain(s), after testing.
+            ),
+            config,
+            () -> {
+              // Boolean supplier that controls when the path will be mirrored
+              // We by default draw the paths on the red side of the field, mirroring them if we are on the blue alliance.
+              // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
+
+              var alliance = DriverStation.getAlliance();
+              if (alliance.isPresent()) {
+                return alliance.get() == DriverStation.Alliance.Blue;
+              }
+              return false;
+            },
+            this // Reference to this subsystem to set requirements
+        );
+
+        // Register logging callbacks so that PathPlanner data shows up in advantage scope.
+        PathPlannerLogging.setLogActivePathCallback( (activePath) -> {
+            Logger.recordOutput("PathPlanner/Trajectory", activePath.toArray(new Pose2d[activePath.size()]));
+        });
+
+        PathPlannerLogging.setLogTargetPoseCallback( (targetPose) -> {
+            // update the desired angle in the angle controller
+            // this is only to allow the LEDs to show progress in auto.
+            // The actual angle controller that sends commands in auto is the one from PathPlanner.
+            double measuredAngleDegrees = getPoseMeters().getRotation().getDegrees();
+            double desiredAngleDegrees = targetPose.getRotation().getDegrees();
+            angleController.calculate(measuredAngleDegrees, desiredAngleDegrees);
+            Logger.recordOutput("PathPlanner/TrajectorySetpoint", targetPose);
+        });
     }
 
 
@@ -209,6 +281,39 @@ public class Drivetrain extends SubsystemBase {
 
         double xMetersPerSecond = pidOutputMetersPerSecond*error.getAngle().getCos();
         double yMetersPerSecond = pidOutputMetersPerSecond*error.getAngle().getSin();
+        
+        fieldOrientedDriveWhileAiming(
+            new ChassisSpeeds(
+                xMetersPerSecond,
+                yMetersPerSecond,
+                0
+            ),
+            desired.getRotation()
+        );
+    }
+
+    public void profileToPose(Pose2d desired) {
+        Logger.recordOutput("drivetrain/pidSetpointMeters", desired);
+
+        Pose2d current = getPoseMeters();
+
+        Translation2d error = desired.getTranslation().minus(current.getTranslation());
+
+        Logger.recordOutput("drivetrain/pidErrorMeters", error);
+        
+        double profiledOutputMetersPerSecond = -profiledController.calculate(error.getNorm(), 0)
+         - profiledController.getSetpoint().velocity;
+
+
+        // copy and pasted tollerance from pid to pose
+
+        if (translationController.atSetpoint()) {
+            profiledOutputMetersPerSecond = 0;
+        }
+
+
+        double xMetersPerSecond = profiledOutputMetersPerSecond*error.getAngle().getCos();
+        double yMetersPerSecond = profiledOutputMetersPerSecond*error.getAngle().getSin();
         
         fieldOrientedDriveWhileAiming(
             new ChassisSpeeds(
@@ -332,13 +437,20 @@ public class Drivetrain extends SubsystemBase {
 
                 // cam is 0.371475 up and 0.1043 forward in meters
 
-                if(mt1.tagCount == 0)
-                {
+                if(mt1.tagCount == 0) {
                     doRejectUpdate = true;
                 }
-                if(!doRejectUpdate)
-                {
-                    Matrix<N3, N1> stdDevs = this.fullyTrustVisionNextPoseUpdate ? VecBuilder.fill(0, 0, 0) : VecBuilder.fill(.5,.5,9999999);
+                if(!doRejectUpdate) {
+                    double slopeStdDevMeters_PerMeter = 0.003;
+                    double tagToCamMeters = mt1.avgTagDist;
+                    if (tagToCamMeters < 1.5) {
+                        slopeStdDevMeters_PerMeter = 0.0;
+                    } else if(tagToCamMeters < 2.5) {
+                        slopeStdDevMeters_PerMeter = 0.001;
+                    }
+            
+                    Matrix<N3, N1> stdDevs = this.fullyTrustVisionNextPoseUpdate ? VecBuilder.fill(0, 0, 0) : VecBuilder.fill(
+                        slopeStdDevMeters_PerMeter*tagToCamMeters, slopeStdDevMeters_PerMeter*tagToCamMeters,9999999);
                     fusedPoseEstimator.setVisionMeasurementStdDevs(stdDevs);
                     fusedPoseEstimator.addVisionMeasurement(
                         mt1.pose,
