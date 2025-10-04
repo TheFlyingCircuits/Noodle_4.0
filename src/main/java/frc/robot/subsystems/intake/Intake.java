@@ -110,19 +110,27 @@ public class Intake extends SubsystemBase {
         setPivotVolts(profilePIDOutputVolts + feedForwardVolts);
     }
 
-    public void score(Supplier<Boolean> facingReef) {
+    public void score(Supplier<Boolean> facingReef, boolean readyToScore) {
         // this function needs to be called in a loop like execute or periodic
-        // checks for coral and if we don't have it or we scored it go to defualt 
-        if (!inputs.hasACoral) {
-            desiredPivotAngleDegrees = IntakeConstants.noCoralPivotSetpointDeg;
-            return;
-        }
         double scoringPivotDegrees = (facingReef.get()) ? IntakeConstants.frontScorePivotSetpointDeg : IntakeConstants.backScorePivotSetpointDeg; 
+        double topGripperScoringVolts = (facingReef.get()) ? IntakeConstants.frontScoreTopGripperVolts : IntakeConstants.backScoreTopGripperVolts;
+        double bottomGripperScoringVolts = (facingReef.get()) ? IntakeConstants.frontScoreBottomGripperVolts : IntakeConstants.backScoreBottomGripperVolts;
+        
+        desiredPivotAngleDegrees = scoringPivotDegrees;
+        if(Math.abs(inputs.pivotAngleDegrees - scoringPivotDegrees) < 1 && readyToScore) { // checks if the pivot is within 1 deg of target
+            desiredTopGripperVolts = topGripperScoringVolts;
+            desiredBottomGripperVolts = bottomGripperScoringVolts;
+            hasACoral = false; // we assume that we wont have a coral after we start to score
+        } else {
+            desiredTopGripperVolts = IntakeConstants.holdCoralGripperVolts;
+            desiredBottomGripperVolts = IntakeConstants.holdCoralGripperVolts;
+        }
 
     }
 
     public void defaultFunction() {
-        if(hasACoral && (inputs.aveBottomGripperAmps < 10 && inputs.aveTopGripperAmps < 10)) {
+        // TODO: find real amp values for when we have and don't have a coral
+        if(hasACoral && (inputs.aveBottomGripperAmps < 10.0 && inputs.aveTopGripperAmps < 10.0)) { // if we have low amps while trying to grip we prob dont have coral
             hasACoral = false; // this is for if we drop the coral while doing defualt command the code adjusts by itself
         }
         
@@ -130,23 +138,25 @@ public class Intake extends SubsystemBase {
             desiredPivotAngleDegrees = IntakeConstants.hasCoralPivotSetpointDeg;
             desiredTopGripperVolts = IntakeConstants.holdCoralGripperVolts;
             desiredBottomGripperVolts = IntakeConstants.holdCoralGripperVolts;
-            return;
+            // return;
         } else {
             desiredPivotAngleDegrees = IntakeConstants.noCoralPivotSetpointDeg;
             desiredTopGripperVolts = 0.0;
             desiredBottomGripperVolts = 0.0;
         }
+        // System.out.println(desiredPivotAngleDegrees);
+
     }
 
     public void intakeCoral() {
-        if (inputs.aveBottomGripperAmps > 20 && inputs.aveTopGripperAmps > 20) {
+        if (inputs.aveBottomGripperAmps > 20.0 && inputs.aveTopGripperAmps > 20.0) {
             hasACoral = true;
             defaultFunction();
             return;
         }
-            desiredPivotAngleDegrees = IntakeConstants.hasCoralPivotSetpointDeg;
-            desiredTopGripperVolts = IntakeConstants.holdCoralGripperVolts;
-            desiredBottomGripperVolts = IntakeConstants.holdCoralGripperVolts;
+            desiredPivotAngleDegrees = IntakeConstants.intakePivotSetpointDeg;
+            desiredTopGripperVolts = IntakeConstants.intakingTopGripperVolts;
+            desiredBottomGripperVolts = IntakeConstants.intakingBottomGripperVolts;
             hasACoral = false;
     }
 
@@ -160,5 +170,17 @@ public class Intake extends SubsystemBase {
 
     public Command setGrippersVoltsCommand(double topGripperVolts, double bottomGripperVolts) {
         return this.run(() -> setGripperVolts(topGripperVolts, bottomGripperVolts));
+    }
+
+    public Command defaultCommand() {
+        return this.run(() -> defaultFunction());
+    }
+
+    public Command intakeCommand() {
+        return this.run(() -> intakeCoral());
+    }
+
+    public Command intakeScoreCommand(Supplier<Boolean> isFacingReef, boolean readyToScore) {
+        return this.run(() -> score(isFacingReef, readyToScore));
     }
 }

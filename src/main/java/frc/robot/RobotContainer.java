@@ -78,7 +78,7 @@ public class RobotContainer {
         realBindings();
         triggers();
 
-        intake.setDefaultCommand(intake.setTargetAngleDegCommand(90));
+        // intake.setDefaultCommand(intake.setTargetAngleDegCommand(90));
     }
 
     private void realBindings() {
@@ -88,20 +88,25 @@ public class RobotContainer {
 
         // duncanController.rightBumper().whileTrue(lineUpWithClosestFace());
 
-        duncanController.x().whileTrue(intake.setTargetAngleDegCommand(0.0)).whileFalse(intake.setTargetAngleDegCommand(90.0));
+        // duncanController.x().whileTrue(intake.setTargetAngleDegCommand(0.0)).whileFalse(intake.setTargetAngleDegCommand(90.0));
 
-        duncanController.b().whileTrue(intake.setPivotVoltsCommand(2));
+        // duncanController.b().whileTrue(intake.setPivotVoltsCommand(2));
 
-        // duncanController.leftBumper().whileTrue(drivetrain.);
+        duncanController.rightTrigger().whileTrue(intake.intakeCommand());
 
-        duncanController.rightBumper().whileTrue(new L1Score(drivetrain,intake, () -> drivetrain.isFacingReef(), 
+        duncanController.leftBumper().whileTrue(new L1Score(drivetrain,intake, () -> drivetrain.isFacingReef(), 
             () -> drivetrain.getClosestReefFace(), () -> duncan.getRequestedFieldOrientedVelocity()));
 
+        if(RobotBase.isSimulation()) {
+            duncanController.a().whileTrue(Commands.run(() ->intake.setAvePivotAmpsForSim(25)));
+            duncanController.b().whileTrue(Commands.run(() ->intake.setAvePivotAmpsForSim(0)));
+        }
 
     }
     public void setDefaultCommands() {
         drivetrain.setDefaultCommand(driverFullyControlDrivetrain().withName("driveDefualtCommand"));
         leds.setDefaultCommand(leds.heartbeatCommand(1.).ignoringDisable(true).withName("ledsDefaultCommand"));
+        intake.setDefaultCommand(intake.defaultCommand());
     }
 
 

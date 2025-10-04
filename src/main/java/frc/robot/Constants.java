@@ -201,7 +201,7 @@ public final class Constants {
         public final static double frontScoreTopGripperVolts = 6.0;
         public final static double frontScoreBottomGripperVolts = 6.0;
         
-        public final static double backScoreTopGripperVolts = -6.0;
+        public final static double backScoreTopGripperVolts = 6.0;
         public final static double backScoreBottomGripperVolts = -6.0;
         
         public final static double holdCoralGripperVolts = -2.0;

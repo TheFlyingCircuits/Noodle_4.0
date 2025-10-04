@@ -279,6 +279,14 @@ public class Drivetrain extends SubsystemBase {
         return dotProduct > 0;
     }
 
+    public boolean isAngleAligned() {
+        return angleController.atSetpoint();
+    }
+
+    public boolean translationControllerAtSetpoint() {
+        return translationController.atSetpoint();
+    }
+
     public void pidToPose(Pose2d desired, double maxSpeedMetersPerSecond) {
         Logger.recordOutput("drivetrain/pidSetpointMeters", desired);
 

@@ -77,6 +77,9 @@ public class L1Score extends Command {
         Pose2d adjustedPose = adjustedReefScoringPose(faceScoringOn.get(), ifFacingReef.get(), driverRequestedVel.get());
         Logger.recordOutput("L1Scoring/targetDrivePose", adjustedPose);
         drivetrain.pidToPose(adjustedPose, 3.0);
+
+        boolean readyToScore = drivetrain.translationControllerAtSetpoint() && drivetrain.isAngleAligned();
+        intake.score(ifFacingReef, readyToScore);
     }
 }
 
