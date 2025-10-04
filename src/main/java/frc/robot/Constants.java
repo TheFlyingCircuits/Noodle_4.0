@@ -70,10 +70,10 @@ public final class Constants {
                 new Translation2d(-wheelbaseMeters / 2.0, -trackwidthMeters / 2.0));
         public static final double maxDesiredTeleopAngularVelocityRadiansPerSecond = Units.rotationsToRadians(0.85);
          
-        // public static final double maxAchievableVelocityMetersPerSecond = 5880.0 / 60.0 *
-        // driveReduction *
-        // wheelDiamaterMeters * Math.PI;
-        public static final double maxAchievableVelocityMetersPerSecond = 2.5;
+        public static final double maxAchievableVelocityMetersPerSecond = 5880.0 / 60.0 *
+        driveReduction *
+        wheelDiamaterMeters * Math.PI;
+        // public static final double maxAchievableVelocityMetersPerSecond = 2.5;
         public static final double maxDesiredTeleopVelocityMetersPerSecond = 4.3;
         public static final double maxAchievableAngularVelocityRadiansPerSecond = maxAchievableVelocityMetersPerSecond /
                 Math.hypot(trackwidthMeters / 2.0, wheelbaseMeters / 2.0);
@@ -81,7 +81,7 @@ public final class Constants {
 
         public static final double frameWidthMeters = Units.inchesToMeters(27);
         // TODO: get real values for framWidth and bumperWidth
-        public static final double bumperWidthMeters = Units.inchesToMeters(27 + 7);
+        public static final double bumperWidthMeters = Units.inchesToMeters(27.0 + 7.0);
 
         public static final double maxDesiredDriverAccel = 27.27;
         public static final PathConstraints pathfindingConstraints = new PathConstraints(
@@ -187,6 +187,26 @@ public final class Constants {
         
         public final static double maxPivotAccelerationRadianPerSecondSquared = 20.0; 
         // max real accel is prob much more than 10 but will edit when get real robot and we prob dont want full acceleration so we get smooth motion
+
+        // Pivot setpoints
+        public final static double frontScorePivotSetpointDeg = 45.0;
+        public final static double backScorePivotSetpointDeg = 135.0;
+        
+        public final static double intakePivotSetpointDeg = 0.0;
+        
+        public final static double noCoralPivotSetpointDeg = 30.0;
+        public final static double hasCoralPivotSetpointDeg = 90.0;
+
+        // Gripper setpoints
+        public final static double frontScoreTopGripperVolts = 6.0;
+        public final static double frontScoreBottomGripperVolts = 6.0;
+        
+        public final static double backScoreTopGripperVolts = -6.0;
+        public final static double backScoreBottomGripperVolts = -6.0;
+        
+        public final static double holdCoralGripperVolts = -2.0;
+        public final static double intakingTopGripperVolts = -12.0;
+        public final static double intakingBottomGripperVolts = -12.0;
     }
 
     public final static class LEDConstants {

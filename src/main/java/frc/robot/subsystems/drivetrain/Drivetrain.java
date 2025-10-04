@@ -129,7 +129,7 @@ public class Drivetrain extends SubsystemBase {
             4, 4));
         profiledController.setTolerance(0.01, 0.01);
 
-        configPathPlanner();
+        // configPathPlanner();
     }
 
     private void configPathPlanner() {
@@ -261,6 +261,24 @@ public class Drivetrain extends SubsystemBase {
         this.fieldOrientedDrive(desiredSpeeds, true);
     }
 
+    public boolean isFacingReef() {
+        // Find the center of the reef, then get the vector from the robot's
+        // current location on the field to the reef.
+        Translation2d frontFace = FieldElement.FRONT_REEF_FACE.getLocation2d();
+        Translation2d backFace = FieldElement.BACK_REEF_FACE.getLocation2d();
+        Translation2d centerOfReef = frontFace.plus(backFace).div(2.0);
+        Translation2d robotToReef = centerOfReef.minus(getPoseMeters().getTranslation());
+
+        // Get the direction the robot is pointed in
+        Rotation2d robotOrientaion = getPoseMeters().getRotation();
+
+        // The robot is considered to be facing the reef if the projection
+        // of [the robot's orientation] onto [the vector from the robot to the reef]
+        // is positive.
+        double dotProduct = (robotOrientaion.getCos() * robotToReef.getX()) + (robotOrientaion.getSin() * robotToReef.getY());
+        return dotProduct > 0;
+    }
+
     public void pidToPose(Pose2d desired, double maxSpeedMetersPerSecond) {
         Logger.recordOutput("drivetrain/pidSetpointMeters", desired);
 
@@ -275,9 +293,12 @@ public class Drivetrain extends SubsystemBase {
 
         if (translationController.atSetpoint()) {
             pidOutputMetersPerSecond = 0;
+            // System.out.println("true");
         }
 
         pidOutputMetersPerSecond = MathUtil.clamp(pidOutputMetersPerSecond, -maxSpeedMetersPerSecond, maxSpeedMetersPerSecond);
+
+        Logger.recordOutput("drivetrain/pidOutputMetersPerSecond", pidOutputMetersPerSecond);
 
         double xMetersPerSecond = pidOutputMetersPerSecond*error.getAngle().getCos();
         double yMetersPerSecond = pidOutputMetersPerSecond*error.getAngle().getSin();

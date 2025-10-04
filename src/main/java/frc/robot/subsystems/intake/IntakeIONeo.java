@@ -5,6 +5,7 @@ import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
+import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.util.Units;
 import frc.robot.Constants.IntakeConstants;
 import frc.robot.VendorWrappers.Neo;
@@ -17,6 +18,9 @@ public class IntakeIONeo implements IntakeIO {
 
     private SparkMaxConfig pivotConfig;
     private SparkMaxConfig gipperConfig;
+
+    LinearFilter topGripperCurrentMovingWindow = LinearFilter.singlePoleIIR(0.2, 0.02);
+    LinearFilter bottomGripperCurrentMovingWindow = LinearFilter.singlePoleIIR(0.2, 0.02);
 
     public IntakeIONeo() {
         configMotors();
@@ -58,9 +62,11 @@ public class IntakeIONeo implements IntakeIO {
 
         inputs.topGripperAppliedVolts = topGripperNeo.getAppliedOutput()*pivotNeo.getBusVoltage();
         inputs.topGripperAmps = topGripperNeo.getOutputCurrent();
+        inputs.aveTopGripperAmps = topGripperCurrentMovingWindow.calculate(inputs.topGripperAmps);
 
         inputs.bottomGripperAppliedVolts = bottomGripperNeo.getAppliedOutput()*pivotNeo.getBusVoltage();
         inputs.bottomGripperAmps = bottomGripperNeo.getOutputCurrent();
+        inputs.aveBottomGripperAmps = bottomGripperCurrentMovingWindow.calculate(inputs.bottomGripperAmps);
     }
 
     @Override

@@ -14,11 +14,17 @@ public interface IntakeIO {
         public double pivotAmps = 0.0;
         public double desiredPivotAngleDeg = 90.0;
 
+        public double desiredTopGripperVolts = 0.0;
         public double topGripperAppliedVolts = 0.0;
         public double topGripperAmps = 0.0;
+        public double aveTopGripperAmps = 0.0;
 
+        public double desiredBottomGripperVolts = 0.0;
         public double bottomGripperAppliedVolts = 0.0;
         public double bottomGripperAmps = 0.0;
+        public double aveBottomGripperAmps = 0.0;
+
+        public boolean hasACoral = false;
     }
 
     public default void updateInputs(IntakeIOInputs inputs) {};

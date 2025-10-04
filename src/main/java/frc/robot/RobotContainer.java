@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import frc.robot.commands.L1Score;
 import frc.robot.subsystems.HumanDriver;
 import frc.robot.subsystems.Leds;
 import frc.robot.subsystems.drivetrain.Drivetrain;
@@ -85,11 +86,16 @@ public class RobotContainer {
         duncanController.y().onTrue(new InstantCommand(() -> drivetrain.fullyTrustVisionNextPoseUpdate()));
         duncanController.povUp().onTrue(Commands.runOnce(drivetrain::setRobotFacingForward));
 
-        duncanController.rightBumper().whileTrue(lineUpWithClosestFace());
+        // duncanController.rightBumper().whileTrue(lineUpWithClosestFace());
 
         duncanController.x().whileTrue(intake.setTargetAngleDegCommand(0.0)).whileFalse(intake.setTargetAngleDegCommand(90.0));
 
         duncanController.b().whileTrue(intake.setPivotVoltsCommand(2));
+
+        // duncanController.leftBumper().whileTrue(drivetrain.);
+
+        duncanController.rightBumper().whileTrue(new L1Score(drivetrain,intake, () -> drivetrain.isFacingReef(), 
+            () -> drivetrain.getClosestReefFace(), () -> duncan.getRequestedFieldOrientedVelocity()));
 
 
     }
