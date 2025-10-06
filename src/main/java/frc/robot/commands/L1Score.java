@@ -32,6 +32,7 @@ public class L1Score extends Command {
         this.faceScoringOn=faceScoringOn;
         this.driverRequestedVel=driverRequestedVel;
         scoringTimer = new Timer();
+        addRequirements(drivetrain, intake);
     }
 
     private Pose2d adjustedReefScoringPose(ReefFace face, boolean isFacingForward, ChassisSpeeds overideY) {
@@ -76,7 +77,7 @@ public class L1Score extends Command {
     }
 
     public boolean hasProblablyScored() {
-        System.out.println(scoringTimer.get() > 2);
+        // System.out.println(scoringTimer.get() > 2);
         return scoringTimer.get() > 2;
     }
 

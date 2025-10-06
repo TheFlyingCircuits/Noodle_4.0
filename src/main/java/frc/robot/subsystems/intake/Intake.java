@@ -130,9 +130,9 @@ public class Intake extends SubsystemBase {
 
     public void defaultFunction() {
         // TODO: find real amp values for when we have and don't have a coral
-        if(hasACoral && (inputs.aveBottomGripperAmps < 10.0 && inputs.aveTopGripperAmps < 10.0)) { // if we have low amps while trying to grip we prob dont have coral
-            hasACoral = false; // this is for if we drop the coral while doing defualt command the code adjusts by itself
-        }
+        // if(hasACoral && (inputs.aveBottomGripperAmps < 10.0 && inputs.aveTopGripperAmps < 10.0)) { // if we have low amps while trying to grip we prob dont have coral
+        //     hasACoral = false; // this is for if we drop the coral while doing defualt command the code adjusts by itself
+        // }
         
         if (hasACoral) {
             desiredPivotAngleDegrees = IntakeConstants.hasCoralPivotSetpointDeg;

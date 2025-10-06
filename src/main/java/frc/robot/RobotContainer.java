@@ -85,11 +85,12 @@ public class RobotContainer {
         duncanController = duncan.getXboxController();
         amaraController = amara.getXboxController();
 
+
+        leftSideAutoPathfindingPose = ReefFace.FRONT_LEFT_REEF_FACE.getPose2d().plus(new Transform2d(1.5,0, new Rotation2d()));
+        rightSideAutoPathfindingPose = ReefFace.FRONT_RIGHT_REEF_FACE.getPose2d().plus(new Transform2d(1.5,0, Rotation2d.kZero));
+
         realBindings();
         triggers();
-
-        leftSideAutoPathfindingPose = ReefFace.FRONT_LEFT_REEF_FACE.getPose2d().plus(new Transform2d(5,0, Rotation2d.kZero));
-        rightSideAutoPathfindingPose = ReefFace.FRONT_RIGHT_REEF_FACE.getPose2d().plus(new Transform2d(5,0, Rotation2d.kZero));
 
         // intake.setDefaultCommand(intake.setTargetAngleDegCommand(90));
     }
@@ -113,6 +114,8 @@ public class RobotContainer {
         if(RobotBase.isSimulation()) {
             duncanController.a().whileTrue(Commands.run(() ->intake.setAvePivotAmpsForSim(25)));
             duncanController.b().whileTrue(Commands.run(() ->intake.setAvePivotAmpsForSim(0)));
+            duncanController.x().whileTrue(pathfindToPose(leftSideAutoPathfindingPose).alongWith(intake.defaultCommand()).until(
+                () -> Math.abs(leftSideAutoPathfindingPose.minus(drivetrain.getPoseMeters()).getTranslation().getNorm()) < 0.5));
         }
 
     }
@@ -155,8 +158,8 @@ public class RobotContainer {
         L1Score score = new L1Score(drivetrain,intake, () -> drivetrain.isFacingReef(), 
             () -> drivetrain.getClosestReefFace(), () -> new ChassisSpeeds());
         return new SequentialCommandGroup(
-            // pathfindToPose(leftSideAutoPathfindingPose).alongWith(intake.defaultCommand()).until(
-            //     () -> Math.abs(leftSideAutoPathfindingPose.minus(drivetrain.getPoseMeters()).getTranslation().getNorm()) < 0.5),
+            pathfindToPose(leftSideAutoPathfindingPose).alongWith(intake.defaultCommand()).until(
+                () -> Math.abs(leftSideAutoPathfindingPose.minus(drivetrain.getPoseMeters()).getTranslation().getNorm()) < 0.5),
 
             score.until((score::hasProblablyScored))
         );
@@ -170,6 +173,9 @@ public class RobotContainer {
                 Units.degreesToRadians(540), Units.degreesToRadians(720));
 
         // Since AutoBuilder is configured, we can use it to build pathfinding commands
+        if (targetPose == null) {
+            return new InstantCommand();
+        }
         return AutoBuilder.pathfindToPose(
                 targetPose,
                 constraints,
