@@ -4,15 +4,10 @@
 
 package frc.robot;
 
-import java.util.List;
-
 import org.littletonrobotics.junction.Logger;
 
 import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.path.GoalEndState;
 import com.pathplanner.lib.path.PathConstraints;
-import com.pathplanner.lib.path.PathPlannerPath;
-import com.pathplanner.lib.path.Waypoint;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -170,12 +165,19 @@ public class RobotContainer {
                 () -> Math.abs(leftSideAutoPathfindingPose.minus(drivetrain.getPoseMeters()).getTranslation().getNorm()) < 0.5),
 
             scoreOnClosestFace.until((scoreOnClosestFace::hasProblablyScored)),
-            pickUpLolipop(3).until(() -> intake.doesHaveACoral()).withTimeout(3),
+
+            pickUpLolipop(1,150.0,-0.25).until(() -> intake.doesHaveACoral()).withTimeout(1.5),
             scoreOnFront.until((scoreOnFront::hasProblablyScored))
+
+            // pickUpLolipop(2,200.0,0.25).asProxy().until(() -> intake.doesHaveACoral()).withTimeout(1.5),
+            // scoreOnFront.until((scoreOnFront::hasProblablyScored)),
+            
+            // pickUpLolipop(3,200.0,0.25).asProxy().until(() -> intake.doesHaveACoral()).withTimeout(1.5),
+            // scoreOnFront.until((scoreOnFront::hasProblablyScored))
         );
     }
 
-    public Command pickUpLolipop(double lolipop) { 
+    public Command pickUpLolipop(int lolipop, double wantedRotationDeg, double adjustedY) { 
         // left it 1 mid is 2 right is 3
         StandardFieldElement lolipopGoingFor;
 
@@ -188,33 +190,17 @@ public class RobotContainer {
         } else {
             return new InstantCommand();
         }
-        // Create a list of waypoints from poses. Each pose represents one waypoint.
-        // The rotation component of the pose should be the direction of travel. Do not use holonomic rotation.
-        List<Waypoint> waypoints = PathPlannerPath.waypointsFromPoses(
-                drivetrain.getPoseMeters(),
-                new Pose2d (lolipopGoingFor.getPose2d().plus(new Transform2d(1,0, new Rotation2d())).getTranslation(),
-                    Rotation2d.fromDegrees(135))
-        );
-
-        PathConstraints constraints = new PathConstraints(0.5, 3.0, 2 * Math.PI, 4 * Math.PI); // The constraints for this path.
-        // PathConstraints constraints = PathConstraints.unlimitedConstraints(12.0); // You can also use unlimited constraints, only limited by motor torque and nominal battery voltage
-
-        // Create the path using the waypoints created above
-        PathPlannerPath path = new PathPlannerPath(
-                waypoints,
-                constraints,
-                null, // The ideal starting state, this is only relevant for pre-planned paths, so can be null for on-the-fly paths.
-                new GoalEndState(0.0, Rotation2d.fromDegrees(135)) // Goal end state. You can set a holonomic rotation here. If using a differential drivetrain, the rotation will have no effect.
-        );
-
-        // Prevent the path from being flipped if the coordinates are already correct
-        path.preventFlipping = true;
+        Pose2d firstPositionToGoTo = new Pose2d (lolipopGoingFor.getPose2d().plus(new Transform2d(0.6, adjustedY, new Rotation2d())).getTranslation(),
+            Rotation2d.fromDegrees(wantedRotationDeg));
+        Pose2d secondPositionToGoTo = new Pose2d(lolipopGoingFor.getPose2d().plus(new Transform2d(-0.3, adjustedY, new Rotation2d())).getTranslation(), 
+            Rotation2d.fromDegrees(wantedRotationDeg));
+        Logger.recordOutput("first loipop pose", firstPositionToGoTo);
 
         return new SequentialCommandGroup(
-            AutoBuilder.followPath(path).alongWith(intake.intakeCommand()).until(() -> intake.isIntakeDown()),
+            Commands.run(() -> drivetrain.pidToPose(firstPositionToGoTo, 4))
+                .alongWith(intake.intakeCommand()).until(() -> intake.isIntakeDown() && drivetrain.translationControllerAtSetpoint()),
             intake.intakeCommand().alongWith(Commands.run(() -> drivetrain.pidToPose(
-                new Pose2d(lolipopGoingFor.getPose2d().plus(new Transform2d(-1,0, new Rotation2d())).getTranslation(), 
-                    Rotation2d.fromDegrees(135)) , 0.5))).until(() -> intake.doesHaveACoral())
+                secondPositionToGoTo , 4))).until(() -> intake.doesHaveACoral())
         );
     }
 
