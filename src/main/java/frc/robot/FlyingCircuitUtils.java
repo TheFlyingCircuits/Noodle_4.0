@@ -20,24 +20,6 @@ import frc.robot.Constants.VisionConstants;
 public class FlyingCircuitUtils {
 
     /**
-     * Generates a field relative pose for the closest pickup for auto-intaking a note
-     * by drawing a straight line to the note.
-     * Once the robot is at this position, the robot should be
-     * able to track the note itself.
-     * @param robot - Current translation of the robot.
-     * @param note - Translation of the target note.
-     * @param radiusMeters - Distance from the note of the output pose.
-     */
-    public static Pose2d pickupAtNote(Translation2d robot, Translation2d note, double radiusMeters) {
-        //vector pointing from the note to the robot
-        Translation2d noteToBot = robot.minus(note);
-
-        Translation2d targetTranslation = note.interpolate(robot, radiusMeters/noteToBot.getNorm());
-
-        return new Pose2d(targetTranslation, noteToBot.getAngle());
-    }
-
-    /**
      * Util method to create a path following command given the name of the path in pathplanner.
      * Make sure to call this after the AutoBuilder is configured.
      */

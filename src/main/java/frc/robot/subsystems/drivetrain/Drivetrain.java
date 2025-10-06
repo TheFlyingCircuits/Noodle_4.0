@@ -129,7 +129,7 @@ public class Drivetrain extends SubsystemBase {
             4, 4));
         profiledController.setTolerance(0.01, 0.01);
 
-        // configPathPlanner();
+        configPathPlanner();
     }
 
     private void configPathPlanner() {

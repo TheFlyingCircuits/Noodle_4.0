@@ -6,13 +6,21 @@ package frc.robot;
 
 import org.littletonrobotics.junction.Logger;
 
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.path.PathConstraints;
+
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import frc.robot.PlayingField.ReefFace;
 import frc.robot.commands.L1Score;
 import frc.robot.subsystems.HumanDriver;
 import frc.robot.subsystems.Leds;
@@ -37,6 +45,8 @@ public class RobotContainer {
     public final Leds leds;
     public final Intake intake;
   
+    public Pose2d leftSideAutoPathfindingPose;
+    public Pose2d rightSideAutoPathfindingPose;
     
     public RobotContainer() {
 
@@ -77,6 +87,9 @@ public class RobotContainer {
 
         realBindings();
         triggers();
+
+        leftSideAutoPathfindingPose = ReefFace.FRONT_LEFT_REEF_FACE.getPose2d().plus(new Transform2d(5,0, Rotation2d.kZero));
+        rightSideAutoPathfindingPose = ReefFace.FRONT_RIGHT_REEF_FACE.getPose2d().plus(new Transform2d(5,0, Rotation2d.kZero));
 
         // intake.setDefaultCommand(intake.setTargetAngleDegCommand(90));
     }
@@ -130,5 +143,37 @@ public class RobotContainer {
 
     private Command lineUpWithClosestFace() {
         return Commands.run (() -> drivetrain.pidToPose(drivetrain.getClosestReefFace().getPose2d().plus(new Transform2d(0.5,0,Rotation2d.k180deg)),2));
+    }
+
+    /** AUTOS!!!!!!!!!! */
+
+    public Command autoChooser() {
+        return leftSideAuto();
+    }
+
+    public Command leftSideAuto() {
+        L1Score score = new L1Score(drivetrain,intake, () -> drivetrain.isFacingReef(), 
+            () -> drivetrain.getClosestReefFace(), () -> new ChassisSpeeds());
+        return new SequentialCommandGroup(
+            // pathfindToPose(leftSideAutoPathfindingPose).alongWith(intake.defaultCommand()).until(
+            //     () -> Math.abs(leftSideAutoPathfindingPose.minus(drivetrain.getPoseMeters()).getTranslation().getNorm()) < 0.5),
+
+            score.until((score::hasProblablyScored))
+        );
+    }
+
+    public Command pathfindToPose(Pose2d targetPose) {
+
+        // Create the constraints to use while pathfinding
+        PathConstraints constraints = new PathConstraints(
+                4.5, 3.0,
+                Units.degreesToRadians(540), Units.degreesToRadians(720));
+
+        // Since AutoBuilder is configured, we can use it to build pathfinding commands
+        return AutoBuilder.pathfindToPose(
+                targetPose,
+                constraints,
+                1.0
+        );
     }
 }

@@ -24,7 +24,7 @@ public interface IntakeIO {
         public double bottomGripperAmps = 0.0;
         public double aveBottomGripperAmps = 0.0;
 
-        public boolean hasACoral = false;
+        public boolean hasACoral = true;
     }
 
     public default void updateInputs(IntakeIOInputs inputs) {};

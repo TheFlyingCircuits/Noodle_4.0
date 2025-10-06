@@ -31,7 +31,7 @@ public class Intake extends SubsystemBase {
 
     double lastLoopVelocityRadPerSec = 0;
 
-    boolean hasACoral = false;
+    boolean hasACoral = true;
 
 
     public Intake(IntakeIO io) {

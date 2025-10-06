@@ -9,6 +9,9 @@ import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.NT4Publisher;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 
+import com.pathplanner.lib.pathfinding.LocalADStar;
+import com.pathplanner.lib.pathfinding.Pathfinding;
+
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.Timer;
@@ -65,6 +68,7 @@ public class Robot extends LoggedRobot {
     @Override
     public void disabledInit() {
         CommandScheduler.getInstance().cancelAll();
+        Pathfinding.setPathfinder(new LocalADStar());
     }
 
     @Override
@@ -73,6 +77,9 @@ public class Robot extends LoggedRobot {
         m_robotContainer.drivetrain.allowTeleportsNextPoseUpdate();
         m_robotContainer.drivetrain.fullyTrustVisionNextPoseUpdate();
 
+        if (autoCommand == null) {
+            autoCommand = m_robotContainer.autoChooser();
+        }
     }
 
     @Override
@@ -87,7 +94,11 @@ public class Robot extends LoggedRobot {
     }
 
     @Override
-    public void autonomousPeriodic() {}
+    public void autonomousPeriodic() {
+        // if (!(autoCommand == null)) {
+        //     System.out.println("qeighipqeoghpique");
+        // }
+    }
 
     @Override
     public void autonomousExit() {}

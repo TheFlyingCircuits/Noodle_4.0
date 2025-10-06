@@ -9,6 +9,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.DrivetrainConstants;
 import frc.robot.PlayingField.ReefFace;
@@ -21,6 +22,8 @@ public class L1Score extends Command {
     private Supplier<ChassisSpeeds> driverRequestedVel;
     private Supplier<ReefFace> faceScoringOn;
     private Supplier<Boolean> ifFacingReef;
+    private Timer scoringTimer;
+    private boolean timerHasNotStarted = true;
 
     public L1Score(Drivetrain drivetrain, Intake intake, Supplier<Boolean> ifFacingReef, Supplier<ReefFace> faceScoringOn, Supplier<ChassisSpeeds> driverRequestedVel) {
         this.drivetrain=drivetrain;
@@ -28,6 +31,7 @@ public class L1Score extends Command {
         this.ifFacingReef=ifFacingReef;
         this.faceScoringOn=faceScoringOn;
         this.driverRequestedVel=driverRequestedVel;
+        scoringTimer = new Timer();
     }
 
     private Pose2d adjustedReefScoringPose(ReefFace face, boolean isFacingForward, ChassisSpeeds overideY) {
@@ -71,6 +75,11 @@ public class L1Score extends Command {
         return scoringPose;
     }
 
+    public boolean hasProblablyScored() {
+        System.out.println(scoringTimer.get() > 2);
+        return scoringTimer.get() > 2;
+    }
+
     @Override
     public void execute() {
         // System.out.println(faceScoringOn.get().getName());
@@ -80,6 +89,19 @@ public class L1Score extends Command {
 
         boolean readyToScore = drivetrain.translationControllerAtSetpoint() && drivetrain.isAngleAligned();
         intake.score(ifFacingReef, readyToScore);
+        
+        if(readyToScore && timerHasNotStarted) {
+            scoringTimer.start();
+            timerHasNotStarted = false;
+        }
+
+        if(!readyToScore) {
+            scoringTimer.stop();
+            scoringTimer.reset();
+            timerHasNotStarted = true;
+        }
+
+        
     }
 }
 
