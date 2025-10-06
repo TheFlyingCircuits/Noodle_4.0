@@ -86,6 +86,14 @@ public class Intake extends SubsystemBase {
         inputs.aveBottomGripperAmps = amps;
     }
 
+    public boolean isIntakeDown() {
+        return Math.abs(inputs.pivotAngleDegrees - IntakeConstants.intakePivotSetpointDeg) < 1.5;
+    }
+
+    public boolean doesHaveACoral() {
+        return inputs.hasACoral;
+    }
+
     public void goToDesiredPivotAngle() {
         // System.out.println(-(Units.degreesToRadians(desiredPivotAngleDegrees) - inputs.pivotAngleRadians));
 

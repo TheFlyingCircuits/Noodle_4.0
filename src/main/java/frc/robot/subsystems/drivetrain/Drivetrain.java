@@ -120,7 +120,8 @@ public class Drivetrain extends SubsystemBase {
         angleController.setTolerance(1); // degrees, degreesPerSecond.
 
         translationController = new PIDController(4, 0, 0.15); // kP has units of metersPerSecond per meter of error.
-        translationController.setTolerance(0.02, 1.0); // meters, metersPerSecond
+        translationController.setTolerance(0.06, 1.0); // meters, metersPerSecond
+        // TODO: real tolerance used to be .02 but changed to .06 for sim
 
         SmartDashboard.putData("drivetrain/angleController", angleController);
         SmartDashboard.putData("drivetrain/translationController", translationController);

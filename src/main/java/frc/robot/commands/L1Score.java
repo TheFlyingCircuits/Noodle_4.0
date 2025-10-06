@@ -78,7 +78,7 @@ public class L1Score extends Command {
 
     public boolean hasProblablyScored() {
         // System.out.println(scoringTimer.get() > 2);
-        return scoringTimer.get() > 2;
+        return scoringTimer.get() > 0.5;
     }
 
     @Override
@@ -86,7 +86,7 @@ public class L1Score extends Command {
         // System.out.println(faceScoringOn.get().getName());
         Pose2d adjustedPose = adjustedReefScoringPose(faceScoringOn.get(), ifFacingReef.get(), driverRequestedVel.get());
         Logger.recordOutput("L1Scoring/targetDrivePose", adjustedPose);
-        drivetrain.pidToPose(adjustedPose, 3.0);
+        drivetrain.pidToPose(adjustedPose, 2.0);
 
         boolean readyToScore = drivetrain.translationControllerAtSetpoint() && drivetrain.isAngleAligned();
         intake.score(ifFacingReef, readyToScore);
