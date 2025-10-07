@@ -5,13 +5,13 @@ import org.littletonrobotics.junction.AutoLog;
 public interface ClimberIO {
     @AutoLog
     public class ClimberIOInputs {
-        public double suckerWheelsRPM = 0.0;
-        public double lifterWheelRMP = 0.0;
+        public double suckerWheelsDegPerSec = 0.0;
+        public double lifterWheeDegPerSec = 0.0;
 
         public double suckerMotorAppliedCurrent = 0.0;
         public double lifterMotorAppliedCurrent = 0.0;
 
-        public boolean limitSwitchHit = false;
+        public double lifterAngleDeg = 180; //TODO make value real
     }
     
     public default void updateInputs(ClimberIOInputs inputs) {};

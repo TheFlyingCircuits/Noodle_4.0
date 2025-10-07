@@ -158,6 +158,11 @@ public final class Constants {
 
     }
 
+    public final static class ClimberConstants {
+        public final static int kPLifterVolts = 1; //TODO make real  
+        public final static double lifterGearReduction = 3;
+    }
+
     public final static class IntakeConstants {
         public final static int leftPivotNeoID = 0;
         public final static int rightPivotNeoID = 1;
