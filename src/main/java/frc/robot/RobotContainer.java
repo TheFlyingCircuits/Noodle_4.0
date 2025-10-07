@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import java.util.function.BooleanSupplier;
+
 import org.littletonrobotics.junction.Logger;
 
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -17,9 +19,11 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import frc.robot.PlayingField.FieldElement;
 import frc.robot.PlayingField.ReefFace;
 import frc.robot.PlayingField.StandardFieldElement;
 import frc.robot.commands.L1Score;
@@ -87,9 +91,6 @@ public class RobotContainer {
         amaraController = amara.getXboxController();
 
 
-        leftSideAutoPathfindingPose = ReefFace.FRONT_LEFT_REEF_FACE.getPose2d().plus(new Transform2d(1.5,0, new Rotation2d()));
-        rightSideAutoPathfindingPose = ReefFace.FRONT_RIGHT_REEF_FACE.getPose2d().plus(new Transform2d(1.5,0, Rotation2d.kZero));
-
         realBindings();
         triggers();
 
@@ -152,34 +153,78 @@ public class RobotContainer {
     /** AUTOS!!!!!!!!!! */
 
     public Command autoChooser() {
-        return leftSideAuto();
+
+        BooleanSupplier startingOnLeft = () -> {return drivetrain.getClosestLoadingStation() == FieldElement.LEFT_LOADING_STATION;};
+
+        return new ConditionalCommand(leftSideAuto(), rightSideAuto(), startingOnLeft);
     }
 
     public Command leftSideAuto() {
+
+        //     leftSideAutoPathfindingPose = ReefFace.FRONT_LEFT_REEF_FACE.getPose2d().plus(new Transform2d(1.5,0, new Rotation2d()));
+        // rightSideAutoPathfindingPose = ReefFace.FRONT_RIGHT_REEF_FACE.getPose2d().plus(new Transform2d(1.5,0, new Rotation2d()));
         L1Score scoreOnClosestFace = new L1Score(drivetrain,intake, () -> drivetrain.isFacingReef(), 
             () -> drivetrain.getClosestReefFace(), () -> new ChassisSpeeds());
         L1Score scoreOnFront = new L1Score(drivetrain,intake, () -> drivetrain.isFacingReef(), 
             () -> ReefFace.FRONT_REEF_FACE, () -> new ChassisSpeeds());
+            L1Score scoreOnFront2 = new L1Score(drivetrain,intake, () -> drivetrain.isFacingReef(), 
+            () -> ReefFace.FRONT_REEF_FACE, () -> new ChassisSpeeds());
+        L1Score scoreOnFront3 = new L1Score(drivetrain,intake, () -> drivetrain.isFacingReef(), 
+            () -> ReefFace.FRONT_REEF_FACE, () -> new ChassisSpeeds());
+
         return new SequentialCommandGroup(
-            pathfindToPose(leftSideAutoPathfindingPose).alongWith(intake.defaultCommand()).until(
-                () -> Math.abs(leftSideAutoPathfindingPose.minus(drivetrain.getPoseMeters()).getTranslation().getNorm()) < 0.5),
+            pathfindToPose(ReefFace.FRONT_LEFT_REEF_FACE.getPose2d().plus(new Transform2d(1.5,0, new Rotation2d()))).alongWith(intake.defaultCommand()).until(
+                () -> Math.abs(ReefFace.FRONT_LEFT_REEF_FACE.getPose2d().plus(new Transform2d(1.5,0, new Rotation2d())).minus(drivetrain.getPoseMeters()).getTranslation().getNorm()) < 0.5),
 
             scoreOnClosestFace.until((scoreOnClosestFace::hasProblablyScored)),
 
             pickUpLolipop(1,150.0,-0.25).until(() -> intake.doesHaveACoral()).withTimeout(1.5),
-            scoreOnFront.until((scoreOnFront::hasProblablyScored))
+            scoreOnFront.until((scoreOnFront::hasProblablyScored)),
 
-            // pickUpLolipop(2,200.0,0.25).asProxy().until(() -> intake.doesHaveACoral()).withTimeout(1.5),
-            // scoreOnFront.until((scoreOnFront::hasProblablyScored)),
+            pickUpLolipop(2,200.0,0.25).until(() -> intake.doesHaveACoral()).withTimeout(1.5),
+            scoreOnFront2.until((scoreOnFront2::hasProblablyScored)),
             
-            // pickUpLolipop(3,200.0,0.25).asProxy().until(() -> intake.doesHaveACoral()).withTimeout(1.5),
-            // scoreOnFront.until((scoreOnFront::hasProblablyScored))
+            pickUpLolipop(3,200.0,0.25).until(() -> intake.doesHaveACoral()).withTimeout(1.5),
+            scoreOnFront3.until((scoreOnFront3::hasProblablyScored))
+        );
+    }
+
+    public Command rightSideAuto() {
+
+        //     leftSideAutoPathfindingPose = ReefFace.FRONT_LEFT_REEF_FACE.getPose2d().plus(new Transform2d(1.5,0, new Rotation2d()));
+        // rightSideAutoPathfindingPose = ReefFace.FRONT_RIGHT_REEF_FACE.getPose2d().plus(new Transform2d(1.5,0, new Rotation2d()));
+        L1Score scoreOnClosestFace = new L1Score(drivetrain,intake, () -> drivetrain.isFacingReef(), 
+            () -> drivetrain.getClosestReefFace(), () -> new ChassisSpeeds());
+        L1Score scoreOnFront = new L1Score(drivetrain,intake, () -> drivetrain.isFacingReef(), 
+            () -> ReefFace.FRONT_REEF_FACE, () -> new ChassisSpeeds());
+            L1Score scoreOnFront2 = new L1Score(drivetrain,intake, () -> drivetrain.isFacingReef(), 
+            () -> ReefFace.FRONT_REEF_FACE, () -> new ChassisSpeeds());
+        L1Score scoreOnFront3 = new L1Score(drivetrain,intake, () -> drivetrain.isFacingReef(), 
+            () -> ReefFace.FRONT_REEF_FACE, () -> new ChassisSpeeds());
+            
+        return new SequentialCommandGroup(
+            pathfindToPose(ReefFace.FRONT_RIGHT_REEF_FACE.getPose2d().plus(new Transform2d(1.5,0, new Rotation2d()))).alongWith(intake.defaultCommand()).until(
+                () -> Math.abs(ReefFace.FRONT_RIGHT_REEF_FACE.getPose2d().plus(new Transform2d(1.5,0, new Rotation2d())).minus(drivetrain.getPoseMeters()).getTranslation().getNorm()) < 0.5),
+            scoreOnClosestFace.until((scoreOnClosestFace::hasProblablyScored)),
+
+            pickUpLolipop(3,200.0,0.25).until(() -> intake.doesHaveACoral()).withTimeout(1.5),
+            scoreOnFront.until((scoreOnFront::hasProblablyScored)),
+
+            pickUpLolipop(2,150.0,-0.25).until(() -> intake.doesHaveACoral()).withTimeout(1.5),
+            scoreOnFront2.until((scoreOnFront2::hasProblablyScored)),
+            
+            pickUpLolipop(1,150.0,-0.25).until(() -> intake.doesHaveACoral()).withTimeout(1.5),
+            scoreOnFront3.until((scoreOnFront3::hasProblablyScored))
         );
     }
 
     public Command pickUpLolipop(int lolipop, double wantedRotationDeg, double adjustedY) { 
         // left it 1 mid is 2 right is 3
         StandardFieldElement lolipopGoingFor;
+
+        // if() {
+
+        // }
 
         if (lolipop == 1) {
             lolipopGoingFor = StandardFieldElement.LEFT_LOLLIPOP;

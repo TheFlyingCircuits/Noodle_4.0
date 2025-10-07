@@ -556,6 +556,9 @@ public class Drivetrain extends SubsystemBase {
     public ReefFace getClosestReefFace() {
         return (ReefFace) this.getClosestFieldElement(FieldElement.ALL_REEF_FACES);
     }
+    public FieldElement getClosestLoadingStation() {
+        return this.getClosestFieldElement(FieldElement.ALL_LOADING_STATIONS);
+    }
 
     @Override
     public void periodic() {

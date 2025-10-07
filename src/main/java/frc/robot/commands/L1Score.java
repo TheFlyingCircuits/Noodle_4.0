@@ -77,7 +77,7 @@ public class L1Score extends Command {
     }
 
     public boolean hasProblablyScored() {
-        // System.out.println(scoringTimer.get() > 2);
+        // System.out.println(scoringTimer.get() > 0.5);
         return scoringTimer.get() > 0.5;
     }
 
