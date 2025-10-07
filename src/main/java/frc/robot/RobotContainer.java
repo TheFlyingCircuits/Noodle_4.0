@@ -16,8 +16,11 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -100,18 +103,16 @@ public class RobotContainer {
     private void realBindings() {
 
         duncanController.y().onTrue(new InstantCommand(() -> drivetrain.fullyTrustVisionNextPoseUpdate()));
-        duncanController.povUp().onTrue(Commands.runOnce(drivetrain::setRobotFacingForward));
 
-        // duncanController.rightBumper().whileTrue(lineUpWithClosestFace());
-
-        // duncanController.x().whileTrue(intake.setTargetAngleDegCommand(0.0)).whileFalse(intake.setTargetAngleDegCommand(90.0));
-
-        // duncanController.b().whileTrue(intake.setPivotVoltsCommand(2));
+        duncanController.x().onTrue(Commands.runOnce(() -> {
+            CommandScheduler.getInstance().cancelAll();
+        }));
 
         duncanController.rightTrigger().whileTrue(intake.intakeCommand());
 
-        duncanController.leftBumper().whileTrue(new L1Score(drivetrain,intake, () -> drivetrain.isFacingReef(), 
+        duncanController.rightBumper().whileTrue(new L1Score(drivetrain,intake, () -> drivetrain.isFacingReef(), 
             () -> drivetrain.getClosestReefFace(), () -> duncan.getRequestedFieldOrientedVelocity()));
+        
 
         if(RobotBase.isSimulation()) {
             duncanController.a().whileTrue(Commands.run(() -> intake.setAvePivotAmpsForSim(25)));
@@ -197,7 +198,7 @@ public class RobotContainer {
             () -> drivetrain.getClosestReefFace(), () -> new ChassisSpeeds());
         L1Score scoreOnFront = new L1Score(drivetrain,intake, () -> drivetrain.isFacingReef(), 
             () -> ReefFace.FRONT_REEF_FACE, () -> new ChassisSpeeds());
-            L1Score scoreOnFront2 = new L1Score(drivetrain,intake, () -> drivetrain.isFacingReef(), 
+        L1Score scoreOnFront2 = new L1Score(drivetrain,intake, () -> drivetrain.isFacingReef(), 
             () -> ReefFace.FRONT_REEF_FACE, () -> new ChassisSpeeds());
         L1Score scoreOnFront3 = new L1Score(drivetrain,intake, () -> drivetrain.isFacingReef(), 
             () -> ReefFace.FRONT_REEF_FACE, () -> new ChassisSpeeds());
@@ -221,11 +222,17 @@ public class RobotContainer {
     public Command pickUpLolipop(int lolipop, double wantedRotationDeg, double adjustedY) { 
         // left it 1 mid is 2 right is 3
         StandardFieldElement lolipopGoingFor;
-
-        // if() {
-
-        // }
-
+        double firstX = 0.6;
+        double secondX = -0.3;
+        // Rotation2d rotation = new Rotation2d();
+        if (DriverStation.getAlliance().isPresent()){
+            if(DriverStation.getAlliance().get() == Alliance.Red) {
+                adjustedY = -adjustedY;
+                firstX = -firstX;
+                secondX = -secondX;
+                wantedRotationDeg = wantedRotationDeg+ 180;
+            }
+        }
         if (lolipop == 1) {
             lolipopGoingFor = StandardFieldElement.LEFT_LOLLIPOP;
         } else if (lolipop == 2) {
@@ -235,9 +242,9 @@ public class RobotContainer {
         } else {
             return new InstantCommand();
         }
-        Pose2d firstPositionToGoTo = new Pose2d (lolipopGoingFor.getPose2d().plus(new Transform2d(0.6, adjustedY, new Rotation2d())).getTranslation(),
+        Pose2d firstPositionToGoTo = new Pose2d (lolipopGoingFor.getPose2d().plus(new Transform2d(firstX, adjustedY, new Rotation2d())).getTranslation(),
             Rotation2d.fromDegrees(wantedRotationDeg));
-        Pose2d secondPositionToGoTo = new Pose2d(lolipopGoingFor.getPose2d().plus(new Transform2d(-0.3, adjustedY, new Rotation2d())).getTranslation(), 
+        Pose2d secondPositionToGoTo = new Pose2d(lolipopGoingFor.getPose2d().plus(new Transform2d(secondX, adjustedY, new Rotation2d())).getTranslation(), 
             Rotation2d.fromDegrees(wantedRotationDeg));
         Logger.recordOutput("first loipop pose", firstPositionToGoTo);
 
