@@ -113,10 +113,10 @@ public class RobotContainer {
             CommandScheduler.getInstance().cancelAll();
         }));
 
-        duncanController.rightTrigger().whileTrue(intake.intakeCommand());
+        // duncanController.rightTrigger().whileTrue(intake.intakeCommand());
 
-        duncanController.rightBumper().whileTrue(new L1Score(drivetrain,intake, () -> drivetrain.isFacingReef(), 
-            () -> drivetrain.getClosestReefFace(), () -> duncan.getRequestedFieldOrientedVelocity()));
+        // duncanController.rightBumper().whileTrue(new L1Score(drivetrain,intake, () -> drivetrain.isFacingReef(), 
+        //     () -> drivetrain.getClosestReefFace(), () -> duncan.getRequestedFieldOrientedVelocity()));
         
 
         if(RobotBase.isSimulation()) {
@@ -126,9 +126,21 @@ public class RobotContainer {
                 StandardFieldElement.LEFT_LOLLIPOP.getPose2d().plus(new Transform2d(1,0, new Rotation2d())))));
         }
 
-        duncanController.leftBumper().whileTrue(climber.setLifterPositionCommand(0)).onFalse(
-            climber.setLifterPositionCommand(90)
-        );
+        // duncanController.leftBumper().whileTrue(climber.setLifterPositionCommand(0)).onFalse(
+        //     climber.setLifterPositionCommand(90)
+        // );
+
+        // TEST BINDINGS
+        // duncanController.rightBumper().whileTrue(Commands.run(() -> intake.setPivotVolts(2)));
+        duncanController.leftBumper().whileTrue(Commands.run(() -> intake.setPivotVolts(-2)));
+        
+        duncanController.rightTrigger().whileTrue(Commands.run(() -> climber.setLifterVolts(2)));
+        duncanController.leftTrigger().whileTrue(Commands.run(() -> climber.setLifterVolts(-2)));
+
+        duncanController.povUp().whileTrue(Commands.run(() ->  intake.setGripperVolts(2, 2)));
+        duncanController.povDown().whileTrue(Commands.run(() -> intake.setGripperVolts(-2, -2)));
+        
+        
 
     }
     public void setDefaultCommands() {

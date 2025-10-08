@@ -159,8 +159,10 @@ public final class Constants {
     }
 
     public final static class ClimberConstants {
-        public final static int kPLifterVolts = 1; //TODO make real  
-        public final static double lifterGearReduction = 3;
+
+        public final static int kPLifterVolts = 0; //TODO make real  
+        // 50:1
+        public final static double lifterGearReduction = 1.0/50.0;
     }
 
     public final static class IntakeConstants {
@@ -176,21 +178,21 @@ public final class Constants {
         // filler value with a 50:1 gear reduction
         public final static double pivotGearReduction = 1.0/50.0; // TODO: change for real robot, also make sure it is a fraction or decimal
 
-        public final static double kSPivotVolts = 0.5; // TODO: all feedforward and PID is filler values besides max theoretical vel
+        public final static double kSPivotVolts = 0.0; // TODO: all feedforward and PID is filler values besides max theoretical vel
         public final static double kGPivotVolts = 0.02;
-        public final static double kVPivotVoltsSecondsPerRadian = 0.1;
-        public final static double kAPivotVoltsSecondsSquaredPerRadian = 0.01;
+        public final static double kVPivotVoltsSecondsPerRadian = 0.0;
+        public final static double kAPivotVoltsSecondsSquaredPerRadian = 0.00;
 
         //in deg bc simplier and feedforward in the end just outputs a voltage so we can use rad for that and deg for this
-        public final static double kPPivotVoltsPerRadian = 12;
-        public final static double kDPivotVoltsPerRadianPerSecond = 1;
+        public final static double kPPivotVoltsPerRadian = 0;
+        public final static double kDPivotVoltsPerRadianPerSecond = 0;
 
         // neo max free spinning speed at nominal voltage is 5820 rpm
         // this is theoretical max velocity
         public final static double maxPivotVelocityRadianPerSecond = 2.0*Math.PI * (5820.0/60.0) * pivotGearReduction; 
         // make rpm rps by /60 then div by gear ratio then converting it to radians by 2pi*
         
-        public final static double maxPivotAccelerationRadianPerSecondSquared = 20.0; 
+        public final static double maxPivotAccelerationRadianPerSecondSquared = 2.0; 
         // max real accel is prob much more than 10 but will edit when get real robot and we prob dont want full acceleration so we get smooth motion
 
         // Pivot setpoints

@@ -58,8 +58,8 @@ public class Intake extends SubsystemBase {
 
         Logger.processInputs("intakeInputs", inputs);
 
-        goToDesiredPivotAngle();
-        setGripperVolts(inputs.desiredTopGripperVolts, inputs.desiredBottomGripperVolts);
+        // goToDesiredPivotAngle();
+        // setGripperVolts(inputs.desiredTopGripperVolts, inputs.desiredBottomGripperVolts);
     }
 
     public void setPivotVolts(double volts) {

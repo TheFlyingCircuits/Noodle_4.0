@@ -9,6 +9,8 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.DrivetrainConstants;
@@ -43,6 +45,10 @@ public class L1Score extends Command {
         Pose2d targetPose = face.getPose2d();
 
         double adjustedY = targetPose.minus(drivetrain.getPoseMeters()).getY();
+
+        if (DriverStation.getAlliance().get() == Alliance.Red) {
+            adjustedY = -adjustedY;
+        }
 
         if (!isFacingForward) {
             adjustedY = -adjustedY;
@@ -86,7 +92,14 @@ public class L1Score extends Command {
         // System.out.println(faceScoringOn.get().getName());
         Pose2d adjustedPose = adjustedReefScoringPose(faceScoringOn.get(), ifFacingReef.get(), driverRequestedVel.get());
         Logger.recordOutput("L1Scoring/targetDrivePose", adjustedPose);
-        drivetrain.pidToPose(adjustedPose, 2.0);
+
+        boolean closeToReef = adjustedPose.minus(drivetrain.getPoseMeters()).getTranslation().getNorm() < 1;
+        if (!closeToReef) {
+            drivetrain.profileToPose(adjustedPose);
+        } else {
+            drivetrain.pidToPose(adjustedPose, 1);
+        }
+        // drivetrain.pidToPose(adjustedPose, 2.0);
 
         boolean readyToScore = drivetrain.translationControllerAtSetpoint() && drivetrain.isAngleAligned();
         intake.score(ifFacingReef, readyToScore);
