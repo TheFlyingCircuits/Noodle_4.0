@@ -12,6 +12,8 @@ import frc.robot.VendorWrappers.Neo;
 
 public class IntakeIONeo implements IntakeIO {
     Neo pivotNeo = new Neo(IntakeConstants.leftPivotNeoID);
+    Neo pivotNeoFollow = new Neo(IntakeConstants.rightPivotNeoID);
+
 
     Neo topGripperNeo = new Neo(IntakeConstants.leftGripperNeoID);
     Neo bottomGripperNeo = new Neo(IntakeConstants.rightGripperNeoID);
@@ -40,6 +42,10 @@ public class IntakeIONeo implements IntakeIO {
             .velocityConversionFactor(360.0/60.0*IntakeConstants.pivotGearReduction); // same thing for velocity but bc vel is deg/sec div by 60 seconds
         
         pivotNeo.configure(pivotConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+
+        pivotConfig.follow(IntakeConstants.leftPivotNeoID); // make pivotNeoFollower follow pivotNeo
+
+        pivotNeoFollow.configure(pivotConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters); // apply config to follower
 
         // Gipper config
         gipperConfig = new SparkMaxConfig();

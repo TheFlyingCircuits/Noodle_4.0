@@ -11,8 +11,11 @@ import frc.robot.Constants.ClimberConstants;
 import frc.robot.VendorWrappers.Neo;
 
 public class ClimberIONeo implements ClimberIO{
-        private Neo sucker;
+    private Neo sucker;
+    private Neo suckerFollow;
     private Neo lifter;
+    private Neo lifterFollow;
+
 
     private SparkMaxConfig configLifter;
     private SparkMaxConfig configSucker;
@@ -20,7 +23,8 @@ public class ClimberIONeo implements ClimberIO{
     private ClimberIONeo() {
         sucker = new Neo(0); //TODO put the real canIDs
         lifter = new Neo(0); 
-
+        suckerFollow = new Neo(0); //TODO put the real canIDs
+        lifterFollow = new Neo(0); 
         configMotors();
     }
 
@@ -37,6 +41,8 @@ public class ClimberIONeo implements ClimberIO{
         configLifter.encoder.positionConversionFactor(360*ClimberConstants.lifterGearReduction)
         .velocityConversionFactor(360/60*ClimberConstants.lifterGearReduction);
 
+
+
         // sucker motor config
         configSucker = new SparkMaxConfig();
         configSucker.idleMode(IdleMode.kBrake)
@@ -44,9 +50,16 @@ public class ClimberIONeo implements ClimberIO{
             .inverted(true);
         configSucker.softLimit.forwardSoftLimitEnabled(false);
 
+        // apply config
         sucker.configure(configSucker, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
         lifter.configure(configLifter, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
+        // change config to follow
+        configSucker.follow(0, true);
+        configLifter.follow(0);
+        
+        suckerFollow.configure(configSucker, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+        lifterFollow.configure(configLifter, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     }
 
     @Override
