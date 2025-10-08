@@ -32,6 +32,8 @@ import frc.robot.PlayingField.StandardFieldElement;
 import frc.robot.commands.L1Score;
 import frc.robot.subsystems.HumanDriver;
 import frc.robot.subsystems.Leds;
+import frc.robot.subsystems.climber.Climber;
+import frc.robot.subsystems.climber.ClimberIOSim;
 import frc.robot.subsystems.drivetrain.Drivetrain;
 import frc.robot.subsystems.drivetrain.GyroIOPigeon;
 import frc.robot.subsystems.drivetrain.GyroIOSim;
@@ -52,6 +54,7 @@ public class RobotContainer {
     public final Drivetrain drivetrain;
     public final Leds leds;
     public final Intake intake;
+    public final Climber climber;
   
     public Pose2d leftSideAutoPathfindingPose;
     public Pose2d rightSideAutoPathfindingPose;
@@ -71,6 +74,7 @@ public class RobotContainer {
 
             leds = new Leds();
             intake = new Intake(new IntakeIOSim(drivetrain));
+            climber = new Climber(new ClimberIOSim(drivetrain));
         }
         else {
             drivetrain = new Drivetrain(
@@ -83,6 +87,7 @@ public class RobotContainer {
 
             leds = new Leds();
             intake = new Intake(new IntakeIOSim(drivetrain));
+            climber = new Climber(new ClimberIOSim(drivetrain));
 
         }
 
@@ -120,6 +125,10 @@ public class RobotContainer {
             duncanController.x().whileTrue(Commands.run(() -> Logger.recordOutput("coral + x",
                 StandardFieldElement.LEFT_LOLLIPOP.getPose2d().plus(new Transform2d(1,0, new Rotation2d())))));
         }
+
+        duncanController.leftBumper().whileTrue(climber.setLifterPositionCommand(0)).onFalse(
+            climber.setLifterPositionCommand(90)
+        );
 
     }
     public void setDefaultCommands() {
