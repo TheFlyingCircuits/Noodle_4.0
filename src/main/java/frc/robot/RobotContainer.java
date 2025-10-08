@@ -144,9 +144,9 @@ public class RobotContainer {
 
     }
     public void setDefaultCommands() {
-        drivetrain.setDefaultCommand(driverFullyControlDrivetrain().withName("driveDefualtCommand"));
-        leds.setDefaultCommand(leds.heartbeatCommand(1.).ignoringDisable(true).withName("ledsDefaultCommand"));
-        intake.setDefaultCommand(intake.defaultCommand());
+        // drivetrain.setDefaultCommand(driverFullyControlDrivetrain().withName("driveDefualtCommand"));
+        // leds.setDefaultCommand(leds.heartbeatCommand(1.).ignoringDisable(true).withName("ledsDefaultCommand"));
+        // intake.setDefaultCommand(intake.defaultCommand());
     }
 
 
