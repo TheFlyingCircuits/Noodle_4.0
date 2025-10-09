@@ -125,14 +125,14 @@ public class RobotContainer {
         // );
 
         // TEST BINDINGS
-        duncanController.rightBumper().whileTrue(Commands.run(() -> intake.setPivotVolts(2)));
-        duncanController.leftBumper().whileTrue(Commands.run(() -> intake.setPivotVolts(-2)));
+        // duncanController.rightBumper().whileTrue(Commands.run(() -> intake.setPivotVolts(2)));
+        // duncanController.leftBumper().whileTrue(Commands.run(() -> intake.setPivotVolts(-2)));
         
         // duncanController.rightTrigger().whileTrue(Commands.run(() -> climber.setLifterVolts(2)));
         // duncanController.leftTrigger().whileTrue(Commands.run(() -> climber.setLifterVolts(-2)));
 
-        duncanController.rightTrigger().whileTrue(Commands.run(() -> climber.setSuckerVolts(-2)))
-            .onFalse(Commands.run(() -> climber.setSuckerVolts(-0)));
+        // duncanController.rightTrigger().whileTrue(Commands.run(() -> climber.setSuckerVolts(-2)))
+            // .onFalse(Commands.run(() -> climber.setSuckerVolts(-0)));
 
         duncanController.povUp().whileTrue(Commands.run(() ->  intake.setGripperVolts(2, 2)));
         duncanController.povDown().whileTrue(Commands.run(() -> intake.setGripperVolts(-2, -2)));
@@ -149,7 +149,7 @@ public class RobotContainer {
 
     }
     public void setDefaultCommands() {
-        // drivetrain.setDefaultCommand(driverFullyControlDrivetrain().withName("driveDefualtCommand"));
+        drivetrain.setDefaultCommand(driverFullyControlDrivetrain().withName("driveDefualtCommand"));
         // leds.setDefaultCommand(leds.heartbeatCommand(1.).ignoringDisable(true).withName("ledsDefaultCommand"));
         // intake.setDefaultCommand(intake.defaultCommand());
         // climber.setDefaultCommand(climber.defualtCommand());

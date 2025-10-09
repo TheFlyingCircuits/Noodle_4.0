@@ -58,8 +58,8 @@ public class Intake extends SubsystemBase {
 
         Logger.processInputs("intakeInputs", inputs);
 
-        // goToDesiredPivotAngle();
-        // setGripperVolts(inputs.desiredTopGripperVolts, inputs.desiredBottomGripperVolts);
+        goToDesiredPivotAngle();
+        setGripperVolts(inputs.desiredTopGripperVolts, inputs.desiredBottomGripperVolts);
     }
 
     public void setPivotVolts(double volts) {
@@ -187,6 +187,7 @@ public class Intake extends SubsystemBase {
     public Command intakeCommand() {
         return this.run(() -> intakeCoral());
     }
+
 
     public Command intakeScoreCommand(Supplier<Boolean> isFacingReef, boolean readyToScore) {
         return this.run(() -> score(isFacingReef, readyToScore));

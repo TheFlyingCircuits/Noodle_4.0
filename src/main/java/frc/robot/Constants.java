@@ -172,8 +172,8 @@ public final class Constants {
         public final static double aimAtCagePositionDeg = 6.0;
         public final static double climbingPositionDeg = 160.0;
         public final static double climberStartingPositionDeg = 90.0;
-        // 50:1
-        public final static double lifterGearReduction = 1.0/50.0;
+        // 3:1, 7:1, 15:42
+        public final static double lifterGearReduction = (1.0 / 3.0) * (1.0 / 7.0) * (42.0 / 15.0);
 
         public final static double cageDetectedAveAmps = 20.0;
     }
@@ -188,17 +188,17 @@ public final class Constants {
         public final static double minPivotAngleDegrees = -1;
 
 
-        // filler value with a 50:1 gear reduction
+        // 3:1 7:1 15:64
         public final static double pivotGearReduction = 1.0/50.0; // TODO: change for real robot, also make sure it is a fraction or decimal
 
         public final static double kSPivotVolts = 0.0; // TODO: all feedforward and PID is filler values besides max theoretical vel
-        public final static double kGPivotVolts = 0.02;
+        public final static double kGPivotVolts = 0.00;
         public final static double kVPivotVoltsSecondsPerRadian = 0.0;
         public final static double kAPivotVoltsSecondsSquaredPerRadian = 0.00;
 
         //in deg bc simplier and feedforward in the end just outputs a voltage so we can use rad for that and deg for this
-        public final static double kPPivotVoltsPerRadian = 0;
-        public final static double kDPivotVoltsPerRadianPerSecond = 0;
+        public final static double kPPivotVoltsPerRadian = 0.0;
+        public final static double kDPivotVoltsPerRadianPerSecond = 0.0;
 
         // neo max free spinning speed at nominal voltage is 5820 rpm
         // this is theoretical max velocity
