@@ -167,7 +167,7 @@ public final class Constants {
         public final static double kPLifterVolts = 0.4; //TODO make real
 
         public final static double kPClimbingLifterVoltsPerDegree = 2.0;
-        public final static double kPClimbingLifterVoltsPerDegreePerSec = 0.5;
+        public final static double kDClimbingLifterVoltsPerDegreePerSec = 0.5;
 
         public final static double aimAtCagePositionDeg = 6.0;
         public final static double climbingPositionDeg = 160.0;

@@ -17,6 +17,14 @@ public interface ClimberIO {
         public double lifterMotorAppliedCurrent = 0.0;
         public double lifterFollowerMotorAppliedCurrent = 0.0;
 
+        public double suckerAppliedVolts = 0.0;
+        public double suckerFollowerAppliedVolts = 0.0;
+        public double lifterMotorAppliedVolts = 0.0;
+        public double lifterFollowerMotorAppliedVolts = 0.0;
+
+        public double suckerAveAmps = 0;
+        public double suckerFollowerAveAmps;
+
         public double lifterAngleDeg = ClimberConstants.climberStartingPositionDeg; //TODO make value real
         public double lifterFollowerAngleDeg = ClimberConstants.climberStartingPositionDeg;
     }

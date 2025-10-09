@@ -2,6 +2,7 @@ package frc.robot.subsystems.climber;
 
 import org.littletonrobotics.junction.Logger;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -41,8 +42,8 @@ public class ClimberIOSim implements ClimberIO{
 
     @Override
     public void setLifterNeoVolts(double volts) {
-
-        pivotVelDegPerSec = volts * 20.0; // volts to deg
+        volts = MathUtil.clamp(volts,-12,12);
+        pivotVelDegPerSec = volts * 10.0; // volts to deg
     }
 
     @Override

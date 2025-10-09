@@ -1,12 +1,11 @@
 package frc.robot.subsystems.climber;
 
-import org.littletonrobotics.junction.Logger;
-
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
+import edu.wpi.first.math.filter.LinearFilter;
 import frc.robot.Constants.ClimberConstants;
 import frc.robot.VendorWrappers.Neo;
 
@@ -19,6 +18,9 @@ public class ClimberIONeo implements ClimberIO{
 
     private SparkMaxConfig configLifter;
     private SparkMaxConfig configSucker;
+
+    LinearFilter suckerCurrentMovingWindow = LinearFilter.singlePoleIIR(0.2, 0.02);
+    LinearFilter suckerFollowerGripperCurrentMovingWindow = LinearFilter.singlePoleIIR(0.2, 0.02);
 
     private ClimberIONeo() {
         sucker = new Neo(0); //TODO put the real canIDs
@@ -76,18 +78,14 @@ public class ClimberIONeo implements ClimberIO{
 
         inputs.lifterAngleDeg = lifter.getPosition();
         inputs.lifterFollowerAngleDeg = lifterFollow.getPosition();
-        
-        Logger.recordOutput("climber/sucker/busVolts", sucker.getBusVoltage());
-        Logger.recordOutput("climber/sucker/amps", sucker.getOutputCurrent());
-        Logger.recordOutput("climber/sucker/dutyCycle", sucker.getAppliedOutput());
-        Logger.recordOutput("placerGrabber/orangeWheelsNeo/supposedAppliedVolts", sucker.getAppliedOutput() * sucker.getBusVoltage());
-        
-        Logger.recordOutput("climber/lifter/busVolts", lifter.getBusVoltage());
-        Logger.recordOutput("climber/lifter/amps", lifter.getOutputCurrent());
-        Logger.recordOutput("climber/lifter/dutyCycle", lifter.getAppliedOutput());
-        Logger.recordOutput("climber/lifter/supposedAppliedVolts", lifter.getAppliedOutput() * lifter.getBusVoltage());
-        Logger.recordOutput("climber/lifter/positionDeg", lifter.getPosition());
-       
+
+        inputs.suckerAveAmps = suckerCurrentMovingWindow.calculate(inputs.suckerMotorAppliedCurrent);
+        inputs.suckerFollowerAveAmps = suckerFollowerGripperCurrentMovingWindow.calculate(inputs.suckerFollowerMotorAppliedCurrent);
+        //opGripperNeo.getAppliedOutput()*pivotNeo.getBusVoltage();
+        inputs.suckerAppliedVolts = sucker.getAppliedOutput()*sucker.getBusVoltage();
+        inputs.suckerFollowerAppliedVolts = suckerFollow.getAppliedOutput()*suckerFollow.getBusVoltage();
+        inputs.lifterMotorAppliedVolts = lifter.getAppliedOutput()*lifter.getBusVoltage();
+        inputs.lifterMotorAppliedVolts = lifterFollow.getAppliedOutput()*lifterFollow.getBusVoltage();
     }
     
     @Override

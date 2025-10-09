@@ -119,19 +119,13 @@ public class RobotContainer {
         //     () -> drivetrain.getClosestReefFace(), () -> duncan.getRequestedFieldOrientedVelocity()));
         
 
-        if(RobotBase.isSimulation()) {
-            duncanController.a().whileTrue(Commands.run(() -> intake.setAvePivotAmpsForSim(25)));
-            duncanController.b().whileTrue(Commands.run(() -> intake.setAvePivotAmpsForSim(0)));
-            duncanController.x().whileTrue(Commands.run(() -> Logger.recordOutput("coral + x",
-                StandardFieldElement.LEFT_LOLLIPOP.getPose2d().plus(new Transform2d(1,0, new Rotation2d())))));
-        }
 
         // duncanController.leftBumper().whileTrue(climber.setLifterPositionCommand(0)).onFalse(
         //     climber.setLifterPositionCommand(90)
         // );
 
         // TEST BINDINGS
-        // duncanController.rightBumper().whileTrue(Commands.run(() -> intake.setPivotVolts(2)));
+        duncanController.rightBumper().whileTrue(Commands.run(() -> intake.setPivotVolts(2)));
         duncanController.leftBumper().whileTrue(Commands.run(() -> intake.setPivotVolts(-2)));
         
         duncanController.rightTrigger().whileTrue(Commands.run(() -> climber.setLifterVolts(2)));
@@ -139,7 +133,15 @@ public class RobotContainer {
 
         duncanController.povUp().whileTrue(Commands.run(() ->  intake.setGripperVolts(2, 2)));
         duncanController.povDown().whileTrue(Commands.run(() -> intake.setGripperVolts(-2, -2)));
-        
+
+    
+        duncanController.povRight().whileTrue(new InstantCommand(() -> climber.setClimbBoolean(false))
+            .alongWith(new InstantCommand(() -> climber.setManualClimbBoolean(false))))
+        .onFalse(
+            climber.climbCommand()
+        );
+
+        duncanController.povLeft().whileTrue(Commands.run(() -> climber.setManualClimbBoolean(true)));
         
 
     }
@@ -147,6 +149,7 @@ public class RobotContainer {
         // drivetrain.setDefaultCommand(driverFullyControlDrivetrain().withName("driveDefualtCommand"));
         // leds.setDefaultCommand(leds.heartbeatCommand(1.).ignoringDisable(true).withName("ledsDefaultCommand"));
         // intake.setDefaultCommand(intake.defaultCommand());
+        // climber.setDefaultCommand(climber.defualtCommand());
     }
 
 
