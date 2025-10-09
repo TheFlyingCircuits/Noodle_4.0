@@ -23,10 +23,10 @@ public class ClimberIONeo implements ClimberIO{
     LinearFilter suckerFollowerGripperCurrentMovingWindow = LinearFilter.singlePoleIIR(0.2, 0.02);
 
     private ClimberIONeo() {
-        sucker = new Neo(0); //TODO put the real canIDs
-        lifter = new Neo(0); 
-        suckerFollow = new Neo(0); //TODO put the real canIDs
-        lifterFollow = new Neo(0); 
+        sucker = new Neo(ClimberConstants.suckerNeoID); //TODO put the real canIDs
+        lifter = new Neo(ClimberConstants.lifterNeoID); 
+        suckerFollow = new Neo(ClimberConstants.suckerFollowerNeoID); //TODO put the real canIDs
+        lifterFollow = new Neo(ClimberConstants.lifterFollowerNeoID); 
         configMotors();
     }
 
@@ -50,15 +50,15 @@ public class ClimberIONeo implements ClimberIO{
         configSucker.idleMode(IdleMode.kBrake)
             .smartCurrentLimit(40)
             .inverted(true);
-        configSucker.softLimit.forwardSoftLimitEnabled(false);
+        // configSucker.softLimit.forwardSoftLimitEnabled(false);
 
         // apply config
         sucker.configure(configSucker, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
         lifter.configure(configLifter, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
         // change config to follow
-        configSucker.follow(0, true);
-        configLifter.follow(0);
+        configSucker.follow(ClimberConstants.suckerNeoID, true);
+        configLifter.follow(ClimberConstants.lifterNeoID, true);
         
         suckerFollow.configure(configSucker, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
         lifterFollow.configure(configLifter, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);

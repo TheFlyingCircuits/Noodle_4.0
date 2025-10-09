@@ -34,8 +34,8 @@ public class IntakeIONeo implements IntakeIO {
         pivotConfig = new SparkMaxConfig();
 
         pivotConfig.idleMode(IdleMode.kBrake);
-        gipperConfig.smartCurrentLimit(30);
-        gipperConfig.inverted(true); // TODO: set real inversion
+        pivotConfig.smartCurrentLimit(30);
+        pivotConfig.inverted(true); // TODO: set real inversion
         // set to in deg by multipling the 1 rotation by 360 deg/gear ratio, 1*(360/gearRatio)
         
         pivotConfig.encoder.positionConversionFactor(360.0*IntakeConstants.pivotGearReduction)
@@ -43,7 +43,7 @@ public class IntakeIONeo implements IntakeIO {
         
         pivotNeo.configure(pivotConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
-        pivotConfig.follow(IntakeConstants.leftPivotNeoID); // make pivotNeoFollower follow pivotNeo
+        pivotConfig.follow(IntakeConstants.leftPivotNeoID, true); // make pivotNeoFollower follow pivotNeo
 
         pivotNeoFollow.configure(pivotConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters); // apply config to follower
 

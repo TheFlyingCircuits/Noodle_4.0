@@ -159,15 +159,15 @@ public final class Constants {
     }
 
     public final static class ClimberConstants {
-        public final static int lifterNeoID = 0;
-        public final static int lifterFollowerNeoID = 1;
-        public final static int suckerNeoID = 2;
-        public final static int suckerFollowerNeoID = 3;
+        public final static int lifterNeoID = 11;
+        public final static int lifterFollowerNeoID = 12;
+        public final static int suckerNeoID = 9;
+        public final static int suckerFollowerNeoID = 10;
 
         public final static double kPLifterVolts = 0.4; //TODO make real
 
-        public final static double kPClimbingLifterVoltsPerDegree = 2.0;
-        public final static double kDClimbingLifterVoltsPerDegreePerSec = 0.5;
+        public final static double kPClimbingLifterVoltsPerDegree = 1.0;
+        public final static double kDClimbingLifterVoltsPerDegreePerSec = 0.1;
 
         public final static double aimAtCagePositionDeg = 6.0;
         public final static double climbingPositionDeg = 160.0;

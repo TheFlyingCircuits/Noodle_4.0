@@ -128,8 +128,11 @@ public class RobotContainer {
         duncanController.rightBumper().whileTrue(Commands.run(() -> intake.setPivotVolts(2)));
         duncanController.leftBumper().whileTrue(Commands.run(() -> intake.setPivotVolts(-2)));
         
-        duncanController.rightTrigger().whileTrue(Commands.run(() -> climber.setLifterVolts(2)));
-        duncanController.leftTrigger().whileTrue(Commands.run(() -> climber.setLifterVolts(-2)));
+        // duncanController.rightTrigger().whileTrue(Commands.run(() -> climber.setLifterVolts(2)));
+        // duncanController.leftTrigger().whileTrue(Commands.run(() -> climber.setLifterVolts(-2)));
+
+        duncanController.rightTrigger().whileTrue(Commands.run(() -> climber.setSuckerVolts(-2)))
+            .onFalse(Commands.run(() -> climber.setSuckerVolts(-0)));
 
         duncanController.povUp().whileTrue(Commands.run(() ->  intake.setGripperVolts(2, 2)));
         duncanController.povDown().whileTrue(Commands.run(() -> intake.setGripperVolts(-2, -2)));
