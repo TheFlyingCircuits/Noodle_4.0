@@ -65,12 +65,17 @@ public class ClimberIONeo implements ClimberIO{
     @Override
     public void updateInputs(ClimberIOInputs inputs) {
         inputs.suckerWheelsDegPerSec = sucker.getVelocity();
+        inputs.suckerFollowerWheelsDegPerSec = suckerFollow.getVelocity();
         inputs.lifterWheeDegPerSec = lifter.getVelocity();
+        inputs.lifterFollowerWheeDegPerSec = lifterFollow.getVelocity();
 
         inputs.suckerMotorAppliedCurrent = sucker.getOutputCurrent();
+        inputs.suckerFollowerMotorAppliedCurrent = suckerFollow.getOutputCurrent();
         inputs.lifterMotorAppliedCurrent = lifter.getOutputCurrent();
+        inputs.lifterFollowerMotorAppliedCurrent = lifterFollow.getOutputCurrent();
 
         inputs.lifterAngleDeg = lifter.getPosition();
+        inputs.lifterFollowerAngleDeg = lifterFollow.getPosition();
         
         Logger.recordOutput("climber/sucker/busVolts", sucker.getBusVoltage());
         Logger.recordOutput("climber/sucker/amps", sucker.getOutputCurrent());

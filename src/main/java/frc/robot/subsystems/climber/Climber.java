@@ -38,6 +38,16 @@ public class Climber extends SubsystemBase {
         setLifterVolts(lifterPIDOutputVolts);
     }
 
+    public void climb() {
+        if (inputs.suckerMotorAppliedCurrent > 20) {
+            setLifterPosition(ClimberConstants.climbingPositionDeg);
+            setSuckerVolts(-1);
+        }
+
+        setSuckerVolts(-12);
+
+    }
+
     public Command setLifterPositionCommand(double desiredLifterDegrees) {
         return this.run(() -> setLifterPosition(desiredLifterDegrees));
     }

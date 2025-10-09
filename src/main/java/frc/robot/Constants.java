@@ -78,7 +78,7 @@ public final class Constants {
         public static final double maxAchievableAngularVelocityRadiansPerSecond = maxAchievableVelocityMetersPerSecond /
                 Math.hypot(trackwidthMeters / 2.0, wheelbaseMeters / 2.0);
         public static final double maxDesiredAngularVelocityRadiansPerSecond = 5.4;
-
+        // 32 36.5
         public static final double frameWidthMeters = Units.inchesToMeters(27);
         // TODO: get real values for framWidth and bumperWidth
         public static final double bumperWidthMeters = Units.inchesToMeters(27.0 + 7.0);
@@ -159,10 +159,23 @@ public final class Constants {
     }
 
     public final static class ClimberConstants {
+        public final static int lifterNeoID = 0;
+        public final static int lifterFollowerNeoID = 1;
+        public final static int suckerNeoID = 2;
+        public final static int suckerFollowerNeoID = 3;
 
-        public final static int kPLifterVolts = 0; //TODO make real  
+        public final static double kPLifterVolts = 0.4; //TODO make real
+
+        public final static double kPClimbingLifterVoltsPerDegree = 2.0;
+        public final static double kPClimbingLifterVoltsPerDegreePerSec = 0.5;
+
+        public final static double aimAtCagePositionDeg = 6.0;
+        public final static double climbingPositionDeg = 160.0;
+        public final static double climberStartingPositionDeg = 90.0;
         // 50:1
         public final static double lifterGearReduction = 1.0/50.0;
+
+        public final static double cageDetectedAveAmps = 20.0;
     }
 
     public final static class IntakeConstants {
