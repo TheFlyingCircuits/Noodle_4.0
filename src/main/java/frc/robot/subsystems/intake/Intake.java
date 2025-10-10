@@ -58,12 +58,18 @@ public class Intake extends SubsystemBase {
 
         Logger.processInputs("intakeInputs", inputs);
 
-        goToDesiredPivotAngle();
+        // goToDesiredPivotAngle();
         setGripperVolts(inputs.desiredTopGripperVolts, inputs.desiredBottomGripperVolts);
+    }
+
+    public void feedForwardVel(double velocityDegreePerSec) {
+        double voltageOutput = pivotFeedForward.calculate(inputs.pivotAngleRadians, Units.degreesToRadians(velocityDegreePerSec));
+        setPivotVolts(voltageOutput);
     }
 
     public void setPivotVolts(double volts) {
         // System.out.println(volts);
+        //+ 0.155* Math.cos(inputs.pivotAngleRadians)
         io.setPivotVolts(volts);
     }
 
@@ -104,7 +110,7 @@ public class Intake extends SubsystemBase {
         double profileSetpointVelRadPerSec = pivotProfiledPID.getSetpoint().velocity;
         // get acceleration by delta velcocity from thisloop-last loop divided by delta time from thislooptime-lastlooptime
         double accelerationRadPerSecSquared = (profileSetpointVelRadPerSec - lastLoopVelocityRadPerSec) / (timer.get() - lastLoopTime); 
-        double feedForwardVolts = pivotFeedForward.calculate(inputs.pivotAngleRadians, profileSetpointVelRadPerSec,accelerationRadPerSecSquared);
+        double feedForwardVolts = pivotFeedForward.calculate(inputs.pivotAngleRadians, profileSetpointVelRadPerSec, accelerationRadPerSecSquared);
         // double feedForwardVolts = pivotFeedForward.calculate(inputs.pivotAngleRadians, profileSetpointVelRadPerSec);
 
 

@@ -164,36 +164,36 @@ public final class Constants {
         public final static int suckerNeoID = 9;
         public final static int suckerFollowerNeoID = 10;
 
-        public final static double kPLifterVolts = 0.4; //TODO make real
+        public final static double kPLifterVolts = 0.2; //TODO make real
 
         public final static double kPClimbingLifterVoltsPerDegree = 1.0;
         public final static double kDClimbingLifterVoltsPerDegreePerSec = 0.1;
 
         public final static double aimAtCagePositionDeg = 6.0;
-        public final static double climbingPositionDeg = 160.0;
+        public final static double climbingPositionDeg = 100.0;
         public final static double climberStartingPositionDeg = 90.0;
-        // 3:1, 7:1, 15:42
-        public final static double lifterGearReduction = (1.0 / 3.0) * (1.0 / 7.0) * (42.0 / 15.0);
+        // 3:1, 7:1, 42:15
+        public final static double lifterGearReduction = (1.0 / 3.0) * (1.0 / 7.0) * (15.0 / 42.0);
 
         public final static double cageDetectedAveAmps = 20.0;
     }
 
     public final static class IntakeConstants {
-        public final static int leftPivotNeoID = 0;
-        public final static int rightPivotNeoID = 1;
-        public final static int leftGripperNeoID = 2;
-        public final static int rightGripperNeoID = 3;
+        public final static int leftPivotNeoID = 13;
+        public final static int rightPivotNeoID = 14;
+        public final static int topGripperNeoID = 15;
+        public final static int bottomGripperNeoID = 16;
 
         public final static double maxPivotAngleDegrees = 160;
         public final static double minPivotAngleDegrees = -1;
 
 
-        // 3:1 7:1 15:64
-        public final static double pivotGearReduction = 1.0/50.0; // TODO: change for real robot, also make sure it is a fraction or decimal
+        // 3:1 7:1 64:15
+        public final static double pivotGearReduction = (1.0 / 3.0) * (1.0 / 7.0) * (15.0/64.0);
 
-        public final static double kSPivotVolts = 0.0; // TODO: all feedforward and PID is filler values besides max theoretical vel
-        public final static double kGPivotVolts = 0.00;
-        public final static double kVPivotVoltsSecondsPerRadian = 0.0;
+        public final static double kSPivotVolts = 0.14; // TODO: all feedforward and PID is filler values besides max theoretical vel
+        public final static double kGPivotVolts = 0.18;
+        public final static double kVPivotVoltsSecondsPerRadian = 1.0/Units.degreesToRadians(31.0);
         public final static double kAPivotVoltsSecondsSquaredPerRadian = 0.00;
 
         //in deg bc simplier and feedforward in the end just outputs a voltage so we can use rad for that and deg for this
@@ -202,10 +202,11 @@ public final class Constants {
 
         // neo max free spinning speed at nominal voltage is 5820 rpm
         // this is theoretical max velocity
-        public final static double maxPivotVelocityRadianPerSecond = 2.0*Math.PI * (5820.0/60.0) * pivotGearReduction; 
+        // public final static double maxPivotVelocityRadianPerSecond = 2.0*Math.PI * (5820.0/60.0) * pivotGearReduction; 
         // make rpm rps by /60 then div by gear ratio then converting it to radians by 2pi*
+        public final static double maxPivotVelocityRadianPerSecond = 1.0;
         
-        public final static double maxPivotAccelerationRadianPerSecondSquared = 2.0; 
+        public final static double maxPivotAccelerationRadianPerSecondSquared = 0.5; 
         // max real accel is prob much more than 10 but will edit when get real robot and we prob dont want full acceleration so we get smooth motion
 
         // Pivot setpoints

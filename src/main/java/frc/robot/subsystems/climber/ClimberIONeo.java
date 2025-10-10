@@ -22,7 +22,7 @@ public class ClimberIONeo implements ClimberIO{
     LinearFilter suckerCurrentMovingWindow = LinearFilter.singlePoleIIR(0.2, 0.02);
     LinearFilter suckerFollowerGripperCurrentMovingWindow = LinearFilter.singlePoleIIR(0.2, 0.02);
 
-    private ClimberIONeo() {
+    public ClimberIONeo() {
         sucker = new Neo(ClimberConstants.suckerNeoID); //TODO put the real canIDs
         lifter = new Neo(ClimberConstants.lifterNeoID); 
         suckerFollow = new Neo(ClimberConstants.suckerFollowerNeoID); //TODO put the real canIDs
@@ -35,9 +35,9 @@ public class ClimberIONeo implements ClimberIO{
         // lifter moter config
         configLifter = new SparkMaxConfig();
         configLifter.idleMode(IdleMode.kBrake)
-            .smartCurrentLimit(40)
+            .smartCurrentLimit(10)
             .inverted(true);
-        configLifter.softLimit.forwardSoftLimitEnabled(false);
+        // configLifter.softLimit.forwardSoftLimitEnabled(false);
 
         // set the gear reduction
         configLifter.encoder.positionConversionFactor(360*ClimberConstants.lifterGearReduction)
@@ -48,7 +48,7 @@ public class ClimberIONeo implements ClimberIO{
         // sucker motor config
         configSucker = new SparkMaxConfig();
         configSucker.idleMode(IdleMode.kBrake)
-            .smartCurrentLimit(40)
+            .smartCurrentLimit(10)
             .inverted(true);
         // configSucker.softLimit.forwardSoftLimitEnabled(false);
 

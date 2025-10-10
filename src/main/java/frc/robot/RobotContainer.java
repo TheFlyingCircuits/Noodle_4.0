@@ -19,6 +19,8 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.SimpleWidget;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -31,8 +33,8 @@ import frc.robot.PlayingField.ReefFace;
 import frc.robot.PlayingField.StandardFieldElement;
 import frc.robot.commands.L1Score;
 import frc.robot.subsystems.HumanDriver;
-import frc.robot.subsystems.Leds;
 import frc.robot.subsystems.climber.Climber;
+import frc.robot.subsystems.climber.ClimberIONeo;
 import frc.robot.subsystems.climber.ClimberIOSim;
 import frc.robot.subsystems.drivetrain.Drivetrain;
 import frc.robot.subsystems.drivetrain.GyroIOPigeon;
@@ -40,6 +42,7 @@ import frc.robot.subsystems.drivetrain.GyroIOSim;
 import frc.robot.subsystems.drivetrain.SwerveModuleIONeo;
 import frc.robot.subsystems.drivetrain.SwerveModuleIOSim;
 import frc.robot.subsystems.intake.Intake;
+import frc.robot.subsystems.intake.IntakeIONeo;
 import frc.robot.subsystems.intake.IntakeIOSim;
 
 
@@ -52,12 +55,13 @@ public class RobotContainer {
 
 
     public final Drivetrain drivetrain;
-    public final Leds leds;
     public final Intake intake;
     public final Climber climber;
   
     public Pose2d leftSideAutoPathfindingPose;
     public Pose2d rightSideAutoPathfindingPose;
+
+    public SimpleWidget pivotSettingVoltage;
     
     public RobotContainer() {
 
@@ -72,9 +76,8 @@ public class RobotContainer {
             new SwerveModuleIONeo(1, 2,  0.088134765625, 1)
             );
 
-            leds = new Leds();
-            intake = new Intake(new IntakeIOSim(drivetrain));
-            climber = new Climber(new ClimberIOSim(drivetrain));
+            intake = new Intake(new IntakeIONeo());
+            climber = new Climber(new ClimberIONeo());
         }
         else {
             drivetrain = new Drivetrain(
@@ -85,7 +88,6 @@ public class RobotContainer {
                 new SwerveModuleIOSim(){}
             );
 
-            leds = new Leds();
             intake = new Intake(new IntakeIOSim(drivetrain));
             climber = new Climber(new ClimberIOSim(drivetrain));
 
@@ -102,6 +104,10 @@ public class RobotContainer {
         realBindings();
         triggers();
 
+        pivotSettingVoltage= Shuffleboard.getTab("robotContainer")
+        .add("pivotSettingVoltage", 0.0);
+
+
         // intake.setDefaultCommand(intake.setTargetAngleDegCommand(90));
     }
 
@@ -112,6 +118,10 @@ public class RobotContainer {
         duncanController.x().onTrue(Commands.runOnce(() -> {
             CommandScheduler.getInstance().cancelAll();
         }));
+
+        // duncanController.a().whileTrue(Commands.run(() -> intake.setPivotVolts(((pivotSettingVoltage.getEntry().get().getDouble())))));
+        duncanController.a().whileTrue(Commands.run(() -> intake.feedForwardVel(((pivotSettingVoltage.getEntry().get().getDouble())))));
+        duncanController.b().whileTrue(intake.setPivotVoltsCommand(0));
 
         // duncanController.rightTrigger().whileTrue(intake.intakeCommand());
 
@@ -131,27 +141,31 @@ public class RobotContainer {
         // duncanController.rightTrigger().whileTrue(Commands.run(() -> climber.setLifterVolts(2)));
         // duncanController.leftTrigger().whileTrue(Commands.run(() -> climber.setLifterVolts(-2)));
 
-        // duncanController.rightTrigger().whileTrue(Commands.run(() -> climber.setSuckerVolts(-2)))
-            // .onFalse(Commands.run(() -> climber.setSuckerVolts(-0)));
+        // duncanController.rightTrigger().whileTrue(Commands.run(() -> intake.setPivotVolts(-1)));
+            // .onFalse(Commands.run(() -> climber.setSuckerVolts(0)));
 
-        duncanController.povUp().whileTrue(Commands.run(() ->  intake.setGripperVolts(2, 2)));
-        duncanController.povDown().whileTrue(Commands.run(() -> intake.setGripperVolts(-2, -2)));
+        // duncanController.leftTrigger().whileTrue(Commands.run(() -> intake.setPivotVolts(1)));
+        //     duncanController.leftBumper().whileTrue(Commands.run(() -> intake.setPivotVolts(0)));
+            // .onFalse(Commands.run(() -> climber.setSuckerVolts(0)));
+
+        // duncanController.povUp().whileTrue(Commands.run(() ->  intake.setGripperVolts(2, 2)));
+        // duncanController.povDown().whileTrue(Commands.run(() -> intake.setGripperVolts(-2, -2)));
 
     
-        duncanController.povRight().whileTrue(new InstantCommand(() -> climber.setClimbBoolean(false))
-            .alongWith(new InstantCommand(() -> climber.setManualClimbBoolean(false))))
-        .onFalse(
-            climber.climbCommand()
-        );
+        // duncanController.povRight().whileTrue(new InstantCommand(() -> climber.setClimbBoolean(false))
+        //     .alongWith(new InstantCommand(() -> climber.setManualClimbBoolean(false))))
+        // .onFalse(
+        //     climber.climbCommand()
+        // );
 
-        duncanController.povLeft().whileTrue(Commands.run(() -> climber.setManualClimbBoolean(true)));
+        // duncanController.povLeft().whileTrue(Commands.run(() -> climber.setManualClimbBoolean(true)));
         
 
     }
     public void setDefaultCommands() {
-        drivetrain.setDefaultCommand(driverFullyControlDrivetrain().withName("driveDefualtCommand"));
+        // drivetrain.setDefaultCommand(driverFullyControlDrivetrain().withName("driveDefualtCommand"));
         // leds.setDefaultCommand(leds.heartbeatCommand(1.).ignoringDisable(true).withName("ledsDefaultCommand"));
-        // intake.setDefaultCommand(intake.defaultCommand());
+        intake.setDefaultCommand(intake.setPivotVoltsCommand(0));
         // climber.setDefaultCommand(climber.defualtCommand());
     }
 
