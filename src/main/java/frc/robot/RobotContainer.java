@@ -61,8 +61,8 @@ public class RobotContainer {
     public Pose2d leftSideAutoPathfindingPose;
     public Pose2d rightSideAutoPathfindingPose;
 
-    public SimpleWidget pivotSettingVoltage;
-    
+    // public SimpleWidget pValueChange;
+    public SimpleWidget pivotKpRad;
     public RobotContainer() {
 
         /**** INITIALIZE SUBSYSTEMS ****/
@@ -93,7 +93,6 @@ public class RobotContainer {
 
         }
 
-        setDefaultCommands();
         
 
 
@@ -104,9 +103,13 @@ public class RobotContainer {
         realBindings();
         triggers();
 
-        pivotSettingVoltage= Shuffleboard.getTab("robotContainer")
-        .add("pivotSettingVoltage", 0.0);
+        // pValueChange= Shuffleboard.getTab("robotContainer")
+        // .add("pivot pivotDesiredDeg", 0.0);
 
+        pivotKpRad = Shuffleboard.getTab("robotContainer")
+        .add("pivot KP", 0.0);
+
+        setDefaultCommands();
 
         // intake.setDefaultCommand(intake.setTargetAngleDegCommand(90));
     }
@@ -120,10 +123,11 @@ public class RobotContainer {
         }));
 
         // duncanController.a().whileTrue(Commands.run(() -> intake.setPivotVolts(((pivotSettingVoltage.getEntry().get().getDouble())))));
-        duncanController.a().whileTrue(Commands.run(() -> intake.feedForwardVel(((pivotSettingVoltage.getEntry().get().getDouble())))));
+        // duncanController.a().whileTrue(Commands.run(() -> intake.setPivotTargetAngleDegrees(pivotDesiredDeg.getEntry().get().getDouble())).alongWith(
+            // Commands.run(() -> intake.goToDesiredPivotAngle(pivotKpRad.getEntry().get().getDouble()))));
         duncanController.b().whileTrue(intake.setPivotVoltsCommand(0));
 
-        // duncanController.rightTrigger().whileTrue(intake.intakeCommand());
+        duncanController.rightTrigger().whileTrue(intake.intakeCommand());
 
         // duncanController.rightBumper().whileTrue(new L1Score(drivetrain,intake, () -> drivetrain.isFacingReef(), 
         //     () -> drivetrain.getClosestReefFace(), () -> duncan.getRequestedFieldOrientedVelocity()));
@@ -165,7 +169,7 @@ public class RobotContainer {
     public void setDefaultCommands() {
         // drivetrain.setDefaultCommand(driverFullyControlDrivetrain().withName("driveDefualtCommand"));
         // leds.setDefaultCommand(leds.heartbeatCommand(1.).ignoringDisable(true).withName("ledsDefaultCommand"));
-        intake.setDefaultCommand(intake.setPivotVoltsCommand(0));
+        intake.setDefaultCommand(intake.defaultCommand(pivotKpRad.getEntry().get().getDouble()));
         // climber.setDefaultCommand(climber.defualtCommand());
     }
 
@@ -215,7 +219,7 @@ public class RobotContainer {
             () -> ReefFace.FRONT_REEF_FACE, () -> new ChassisSpeeds());
 
         return new SequentialCommandGroup(
-            pathfindToPose(ReefFace.FRONT_LEFT_REEF_FACE.getPose2d().plus(new Transform2d(1.5,0, new Rotation2d()))).alongWith(intake.defaultCommand()).until(
+            pathfindToPose(ReefFace.FRONT_LEFT_REEF_FACE.getPose2d().plus(new Transform2d(1.5,0, new Rotation2d()))).alongWith(intake.defaultCommand(0)).until(
                 () -> Math.abs(ReefFace.FRONT_LEFT_REEF_FACE.getPose2d().plus(new Transform2d(1.5,0, new Rotation2d())).minus(drivetrain.getPoseMeters()).getTranslation().getNorm()) < 0.5),
 
             scoreOnClosestFace.until((scoreOnClosestFace::hasProblablyScored)),
@@ -245,7 +249,7 @@ public class RobotContainer {
             () -> ReefFace.FRONT_REEF_FACE, () -> new ChassisSpeeds());
             
         return new SequentialCommandGroup(
-            pathfindToPose(ReefFace.FRONT_RIGHT_REEF_FACE.getPose2d().plus(new Transform2d(1.5,0, new Rotation2d()))).alongWith(intake.defaultCommand()).until(
+            pathfindToPose(ReefFace.FRONT_RIGHT_REEF_FACE.getPose2d().plus(new Transform2d(1.5,0, new Rotation2d()))).alongWith(intake.defaultCommand(0)).until(
                 () -> Math.abs(ReefFace.FRONT_RIGHT_REEF_FACE.getPose2d().plus(new Transform2d(1.5,0, new Rotation2d())).minus(drivetrain.getPoseMeters()).getTranslation().getNorm()) < 0.5),
             scoreOnClosestFace.until((scoreOnClosestFace::hasProblablyScored)),
 

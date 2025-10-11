@@ -191,13 +191,13 @@ public final class Constants {
         // 3:1 7:1 64:15
         public final static double pivotGearReduction = (1.0 / 3.0) * (1.0 / 7.0) * (15.0/64.0);
 
-        public final static double kSPivotVolts = 0.14; // TODO: all feedforward and PID is filler values besides max theoretical vel
-        public final static double kGPivotVolts = 0.18;
-        public final static double kVPivotVoltsSecondsPerRadian = 1.0/Units.degreesToRadians(31.0);
+        public final static double kSPivotVolts = 0.1; // TODO: all feedforward and PID is filler values besides max theoretical vel
+        public final static double kGPivotVolts = 0.22;
+        public final static double kVPivotVoltsSecondsPerRadian = 1.5 * Units.rotationsToRadians((473/60)*pivotGearReduction);
+        // public final static double kVPivotVoltsSecondsPerRadian = 1.0/Units.degreesToRadians(31.0);
         public final static double kAPivotVoltsSecondsSquaredPerRadian = 0.00;
 
-        //in deg bc simplier and feedforward in the end just outputs a voltage so we can use rad for that and deg for this
-        public final static double kPPivotVoltsPerRadian = 0.0;
+        public final static double kPPivotVoltsPerRadian = 0.1;
         public final static double kDPivotVoltsPerRadianPerSecond = 0.0;
 
         // neo max free spinning speed at nominal voltage is 5820 rpm
@@ -206,16 +206,16 @@ public final class Constants {
         // make rpm rps by /60 then div by gear ratio then converting it to radians by 2pi*
         public final static double maxPivotVelocityRadianPerSecond = 1.0;
         
-        public final static double maxPivotAccelerationRadianPerSecondSquared = 0.5; 
+        public final static double maxPivotAccelerationRadianPerSecondSquared = 0.1; 
         // max real accel is prob much more than 10 but will edit when get real robot and we prob dont want full acceleration so we get smooth motion
 
         // Pivot setpoints
         public final static double frontScorePivotSetpointDeg = 45.0;
         public final static double backScorePivotSetpointDeg = 135.0;
         
-        public final static double intakePivotSetpointDeg = 0.0;
+        public final static double intakePivotSetpointDeg = 30.0;
         
-        public final static double noCoralPivotSetpointDeg = 30.0;
+        public final static double noCoralPivotSetpointDeg = 90.0;
         public final static double hasCoralPivotSetpointDeg = 90.0;
 
         // Gripper setpoints

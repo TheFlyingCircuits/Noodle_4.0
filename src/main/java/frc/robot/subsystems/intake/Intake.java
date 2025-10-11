@@ -33,6 +33,8 @@ public class Intake extends SubsystemBase {
 
     boolean hasACoral = true;
 
+    double pChange = 0.1;
+
 
     public Intake(IntakeIO io) {
         this.io = io;
@@ -58,12 +60,14 @@ public class Intake extends SubsystemBase {
 
         Logger.processInputs("intakeInputs", inputs);
 
-        // goToDesiredPivotAngle();
-        setGripperVolts(inputs.desiredTopGripperVolts, inputs.desiredBottomGripperVolts);
+        goToDesiredPivotAngle();
+        // setGripperVolts(inputs.desiredTopGripperVolts, inputs.desiredBottomGripperVolts);
     }
 
-    public void feedForwardVel(double velocityDegreePerSec) {
-        double voltageOutput = pivotFeedForward.calculate(inputs.pivotAngleRadians, Units.degreesToRadians(velocityDegreePerSec));
+    public void feedForwardVel(double KvVoltsPerDegPerSec, double desiredDegPerSec) {
+        // pivotFeedForward.setKv(Units.degreesToRadians(KvVoltsPerDegPerSec));
+        double voltageOutput = pivotFeedForward.calculate(inputs.pivotAngleRadians, Units.degreesToRadians(desiredDegPerSec));
+        
         setPivotVolts(voltageOutput);
     }
 
@@ -102,9 +106,11 @@ public class Intake extends SubsystemBase {
 
     public void goToDesiredPivotAngle() {
         // System.out.println(-(Units.degreesToRadians(desiredPivotAngleDegrees) - inputs.pivotAngleRadians));
+        pivotProfiledPID.setP(pChange);
 
         double profilePIDOutputVolts = pivotProfiledPID.calculate(inputs.pivotAngleRadians,
             new TrapezoidProfile.State(Units.degreesToRadians(inputs.desiredPivotAngleDeg), 0));
+        // double profilePIDOutputVolts = pivotProfiledPID.calculate(inputs.pivotAngleRadians)
         // we use .calculate for that and .setpoint for feed forward because .setpoint is where it should be on the profile but .calculate includes pid and is in volts
         // System.out.println(pivotProfiledPID.getSetpoint().velocity);
         double profileSetpointVelRadPerSec = pivotProfiledPID.getSetpoint().velocity;
@@ -112,6 +118,10 @@ public class Intake extends SubsystemBase {
         double accelerationRadPerSecSquared = (profileSetpointVelRadPerSec - lastLoopVelocityRadPerSec) / (timer.get() - lastLoopTime); 
         double feedForwardVolts = pivotFeedForward.calculate(inputs.pivotAngleRadians, profileSetpointVelRadPerSec, accelerationRadPerSecSquared);
         // double feedForwardVolts = pivotFeedForward.calculate(inputs.pivotAngleRadians, profileSetpointVelRadPerSec);
+        Logger.recordOutput("goToDesiredPos/ pidOutput", profilePIDOutputVolts);
+        Logger.recordOutput("goToDesiredPos/ feedForwardVolts", feedForwardVolts);
+        Logger.recordOutput("goToDesiredPos/ setpointVelocity", Units.radiansToDegrees(profileSetpointVelRadPerSec));
+
 
 
         lastLoopTime = timer.get();
@@ -120,6 +130,7 @@ public class Intake extends SubsystemBase {
         // System.out.println(inputs.pivotAngleRadians + " rad");
 
         // System.out.println(feedForwardVolts);
+        // System.out.println(profilePIDOutputVolts);
 
         setPivotVolts(profilePIDOutputVolts + feedForwardVolts);
     }
@@ -142,19 +153,20 @@ public class Intake extends SubsystemBase {
 
     }
 
-    public void defaultFunction() {
+    public void defaultFunction(double newPValue) {
         // TODO: find real amp values for when we have and don't have a coral
         // if(hasACoral && (inputs.aveBottomGripperAmps < 10.0 && inputs.aveTopGripperAmps < 10.0)) { // if we have low amps while trying to grip we prob dont have coral
         //     hasACoral = false; // this is for if we drop the coral while doing defualt command the code adjusts by itself
         // }
         
         if (hasACoral) {
-            desiredPivotAngleDegrees = IntakeConstants.hasCoralPivotSetpointDeg;
-            desiredTopGripperVolts = IntakeConstants.holdCoralGripperVolts;
-            desiredBottomGripperVolts = IntakeConstants.holdCoralGripperVolts;
+            // desiredPivotAngleDegrees = IntakeConstants.hasCoralPivotSetpointDeg;
+            // desiredTopGripperVolts = IntakeConstants.holdCoralGripperVolts;
+            // desiredBottomGripperVolts = IntakeConstants.holdCoralGripperVolts;
             // return;
         } else {
             desiredPivotAngleDegrees = IntakeConstants.noCoralPivotSetpointDeg;
+            pChange = newPValue;
             desiredTopGripperVolts = 0.0;
             desiredBottomGripperVolts = 0.0;
         }
@@ -165,12 +177,12 @@ public class Intake extends SubsystemBase {
     public void intakeCoral() {
         if (inputs.aveBottomGripperAmps > 20.0 && inputs.aveTopGripperAmps > 20.0) {
             hasACoral = true;
-            defaultFunction();
+            defaultFunction(pChange);
             return;
         }
             desiredPivotAngleDegrees = IntakeConstants.intakePivotSetpointDeg;
-            desiredTopGripperVolts = IntakeConstants.intakingTopGripperVolts;
-            desiredBottomGripperVolts = IntakeConstants.intakingBottomGripperVolts;
+            // desiredTopGripperVolts = IntakeConstants.intakingTopGripperVolts;
+            // desiredBottomGripperVolts = IntakeConstants.intakingBottomGripperVolts;
             hasACoral = false;
     }
 
@@ -186,8 +198,8 @@ public class Intake extends SubsystemBase {
         return this.run(() -> setGripperVolts(topGripperVolts, bottomGripperVolts));
     }
 
-    public Command defaultCommand() {
-        return this.run(() -> defaultFunction());
+    public Command defaultCommand(double newPValue) {
+        return this.run(() -> defaultFunction(newPValue));
     }
 
     public Command intakeCommand() {

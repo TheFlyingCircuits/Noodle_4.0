@@ -35,7 +35,7 @@ public class IntakeIONeo implements IntakeIO {
         pivotConfig = new SparkMaxConfig();
 
         pivotConfig.idleMode(IdleMode.kBrake);
-        pivotConfig.smartCurrentLimit(10);
+        pivotConfig.smartCurrentLimit(20);
         pivotConfig.inverted(true); // TODO: set real inversion
         // set to in deg by multipling the 1 rotation by 360 deg/gear ratio, 1*(360/gearRatio)
         
@@ -70,7 +70,7 @@ public class IntakeIONeo implements IntakeIO {
         SmartDashboard.putNumber("TEST motor position", pivotNeo.getEncoder().getPosition());
         SmartDashboard.putNumber("TEST arm postion", pivotNeo.getEncoder().getPosition() * 360.0*IntakeConstants.pivotGearReduction);
 
-        inputs.pivotAngleRadians = Units.degreesToRadians(inputs.pivotAngleDegrees);
+        inputs.pivotAngleRadians = Units.degreesToRadians(pivotNeo.getEncoder().getPosition());
         inputs.pivotVelocityDegreesPerSecond = pivotNeo.getVelocity();
         inputs.pivotAppliedVolts = pivotNeo.getAppliedOutput()*pivotNeo.getBusVoltage();
         inputs.pivotAmps = pivotNeo.getOutputCurrent();
