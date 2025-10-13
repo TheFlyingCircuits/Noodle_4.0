@@ -20,6 +20,7 @@ public class IntakeIONeo implements IntakeIO {
     Neo bottomGripperNeo = new Neo(IntakeConstants.bottomGripperNeoID);
 
     private SparkMaxConfig pivotConfig;
+    private SparkMaxConfig pivotConfigFollower;
     private SparkMaxConfig gipperConfig;
 
     LinearFilter topGripperCurrentMovingWindow = LinearFilter.singlePoleIIR(0.2, 0.02);
@@ -48,15 +49,17 @@ public class IntakeIONeo implements IntakeIO {
 
         pivotNeo.getEncoder().setPosition(-19);
 
-        pivotConfig.follow(IntakeConstants.leftPivotNeoID, true); // make pivotNeoFollower follow pivotNeo
+        pivotConfigFollower = pivotConfig;
 
-        pivotNeoFollow.configure(pivotConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters); // apply config to follower
+        pivotConfigFollower.follow(IntakeConstants.leftPivotNeoID, true); // make pivotNeoFollower follow pivotNeo
+
+        pivotNeoFollow.configure(pivotConfigFollower, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters); // apply config to follower
 
         // Gipper config
         gipperConfig = new SparkMaxConfig();
 
         gipperConfig.idleMode(IdleMode.kBrake);
-        gipperConfig.smartCurrentLimit(30);
+        gipperConfig.smartCurrentLimit(50);
         gipperConfig.inverted(true); // TODO: set real inversion
 
         topGripperNeo.configure(gipperConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
@@ -82,6 +85,24 @@ public class IntakeIONeo implements IntakeIO {
         inputs.bottomGripperAppliedVolts = bottomGripperNeo.getAppliedOutput()*pivotNeo.getBusVoltage();
         inputs.bottomGripperAmps = bottomGripperNeo.getOutputCurrent();
         inputs.aveBottomGripperAmps = bottomGripperCurrentMovingWindow.calculate(inputs.bottomGripperAmps);
+    }
+
+    @Override
+    public void setCoastMode(boolean shouldBeInCoast) {
+        IdleMode idleMode;
+        if (shouldBeInCoast) {
+            idleMode = IdleMode.kCoast;
+        }
+        else{
+            idleMode = IdleMode.kBrake;
+        }
+
+        pivotConfig.idleMode(idleMode);
+        pivotConfigFollower.idleMode(idleMode);
+
+
+        // pivotNeo.configure(pivotConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+        // pivotNeoFollow.configure(pivotConfigFollower, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     }
 
     @Override

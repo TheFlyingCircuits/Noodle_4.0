@@ -462,7 +462,7 @@ public class Drivetrain extends SubsystemBase {
                     if(mt1.rawFiducials[0].ambiguity > .7) {
                     doRejectUpdate = true;
                     }
-                    if(mt1.rawFiducials[0].distToCamera > 3) {
+                    if(mt1.rawFiducials[0].distToCamera > 4) {
                     doRejectUpdate = true;
                     }
                 }
@@ -485,7 +485,7 @@ public class Drivetrain extends SubsystemBase {
                         if(mt1LeftCam.rawFiducials[0].ambiguity > .7) {
                             doRejectUpdateFromLeftCam = true;
                         }
-                        if(mt1LeftCam.rawFiducials[0].distToCamera > 3) {
+                        if(mt1LeftCam.rawFiducials[0].distToCamera > 4) {
                             doRejectUpdateFromLeftCam = true;
                         }
                     }
@@ -536,7 +536,7 @@ public class Drivetrain extends SubsystemBase {
         }
     
         else {
-            System.out.println("no mt1");
+            // System.out.println("no mt1");
         }
 
 

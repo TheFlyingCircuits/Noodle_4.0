@@ -185,7 +185,7 @@ public final class Constants {
         public final static int bottomGripperNeoID = 16;
 
         public final static double maxPivotAngleDegrees = 160;
-        public final static double minPivotAngleDegrees = -1;
+        public final static double minPivotAngleDegrees = -22;
 
 
         // 3:1 7:1 64:15
@@ -193,11 +193,12 @@ public final class Constants {
 
         public final static double kSPivotVolts = 0.1; // TODO: all feedforward and PID is filler values besides max theoretical vel
         public final static double kGPivotVolts = 0.22;
-        public final static double kVPivotVoltsSecondsPerRadian = 1 / Units.rotationsToRadians((473/60)*pivotGearReduction);
+        //The velocity gain in V/(rad/s).
+        public final static double kVPivotVoltsSecondsPerRadian = 0.85* (1 / Units.rotationsToRadians((473/60)*pivotGearReduction));
         // public final static double kVPivotVoltsSecondsPerRadian = 1.0/Units.degreesToRadians(31.0);
         public final static double kAPivotVoltsSecondsSquaredPerRadian = 0.00;
 
-        public final static double kPPivotVoltsPerRadian = 0.1;
+        public final static double kPPivotVoltsPerRadian = 2.0;
         public final static double kDPivotVoltsPerRadianPerSecond = 0.0;
 
         // neo max free spinning speed at nominal voltage is 5820 rpm
@@ -206,17 +207,17 @@ public final class Constants {
         // make rpm rps by /60 then div by gear ratio then converting it to radians by 2pi*
         // public final static double maxPivotVelocityRadianPerSecond = 1.0;
         
-        public final static double maxPivotAccelerationRadianPerSecondSquared = 5.0; 
+        public final static double maxPivotAccelerationRadianPerSecondSquared = 5; 
         // max real accel is prob much more than 10 but will edit when get real robot and we prob dont want full acceleration so we get smooth motion
 
         // Pivot setpoints
         public final static double frontScorePivotSetpointDeg = 45.0;
-        public final static double backScorePivotSetpointDeg = 135.0;
+        public final static double backScorePivotSetpointDeg = 110.0;
         
         public final static double intakePivotSetpointDeg = -19.0;
         
-        public final static double noCoralPivotSetpointDeg = 90.0;
-        public final static double hasCoralPivotSetpointDeg = 90.0;
+        public final static double noCoralPivotSetpointDeg = 70.0;
+        public final static double hasCoralPivotSetpointDeg = 95.0;
 
         // Gripper setpoints
         public final static double frontScoreTopGripperVolts = 6.0;
@@ -225,9 +226,9 @@ public final class Constants {
         public final static double backScoreTopGripperVolts = 6.0;
         public final static double backScoreBottomGripperVolts = -6.0;
         
-        public final static double holdCoralGripperVolts = -2.0;
-        public final static double intakingTopGripperVolts = -2.0;
-        public final static double intakingBottomGripperVolts = -12.0;
+        public final static double holdCoralGripperVolts = 0.0;
+        public final static double intakingTopGripperVolts = -8.0;
+        public final static double intakingBottomGripperVolts = -8.0;
     }
 
     public final static class LEDConstants {

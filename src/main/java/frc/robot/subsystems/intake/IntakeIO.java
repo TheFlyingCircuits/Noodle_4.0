@@ -12,7 +12,7 @@ public interface IntakeIO {
         public double pivotVelocityDegreesPerSecond = 0.0;
         public double pivotAppliedVolts = 0.0;
         public double pivotAmps = 0.0;
-        public double desiredPivotAngleDeg = 90.0;
+        public double desiredPivotAngleDeg = -19.0;
 
         public double desiredTopGripperVolts = 0.0;
         public double topGripperAppliedVolts = 0.0;
@@ -24,7 +24,7 @@ public interface IntakeIO {
         public double bottomGripperAmps = 0.0;
         public double aveBottomGripperAmps = 0.0;
 
-        public boolean hasACoral = true;
+        public boolean hasACoral = false;
     }
 
     public default void updateInputs(IntakeIOInputs inputs) {};
@@ -32,6 +32,8 @@ public interface IntakeIO {
     public default void setPivotVolts(double volts) {};
 
     public default void setPivotPosition(double positionDegrees) {};
+
+    public default void setCoastMode(boolean shouldBeInCoast) {};
 
     public default void setTopGripperVolts(double volts) {};
 
