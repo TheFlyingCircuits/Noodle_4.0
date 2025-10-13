@@ -202,18 +202,18 @@ public final class Constants {
 
         // neo max free spinning speed at nominal voltage is 5820 rpm
         // this is theoretical max velocity
-        // public final static double maxPivotVelocityRadianPerSecond = 2.0*Math.PI * (5820.0/60.0) * pivotGearReduction; 
+        public final static double maxPivotVelocityRadianPerSecond = 2.0*Math.PI * (5820.0/60.0) * pivotGearReduction; 
         // make rpm rps by /60 then div by gear ratio then converting it to radians by 2pi*
-        public final static double maxPivotVelocityRadianPerSecond = 1.0;
+        // public final static double maxPivotVelocityRadianPerSecond = 1.0;
         
-        public final static double maxPivotAccelerationRadianPerSecondSquared = 0.1; 
+        public final static double maxPivotAccelerationRadianPerSecondSquared = 5.0; 
         // max real accel is prob much more than 10 but will edit when get real robot and we prob dont want full acceleration so we get smooth motion
 
         // Pivot setpoints
         public final static double frontScorePivotSetpointDeg = 45.0;
         public final static double backScorePivotSetpointDeg = 135.0;
         
-        public final static double intakePivotSetpointDeg = 30.0;
+        public final static double intakePivotSetpointDeg = -19.0;
         
         public final static double noCoralPivotSetpointDeg = 90.0;
         public final static double hasCoralPivotSetpointDeg = 90.0;
@@ -226,7 +226,7 @@ public final class Constants {
         public final static double backScoreBottomGripperVolts = -6.0;
         
         public final static double holdCoralGripperVolts = -2.0;
-        public final static double intakingTopGripperVolts = -12.0;
+        public final static double intakingTopGripperVolts = -2.0;
         public final static double intakingBottomGripperVolts = -12.0;
     }
 

@@ -156,21 +156,21 @@ public class RobotContainer {
         // duncanController.povDown().whileTrue(Commands.run(() -> intake.setGripperVolts(-2, -2)));
 
     
-        // duncanController.povRight().whileTrue(new InstantCommand(() -> climber.setClimbBoolean(false))
-        //     .alongWith(new InstantCommand(() -> climber.setManualClimbBoolean(false))))
-        // .onFalse(
-        //     climber.climbCommand()
-        // );
+        duncanController.povRight().whileTrue(new InstantCommand(() -> climber.setClimbBoolean(false))
+            .alongWith(new InstantCommand(() -> climber.setManualClimbBoolean(false))))
+        .onFalse(
+            climber.climbCommand()
+        );
 
-        // duncanController.povLeft().whileTrue(Commands.run(() -> climber.setManualClimbBoolean(true)));
+        duncanController.povLeft().whileTrue(Commands.run(() -> climber.setManualClimbBoolean(true)));
         
 
     }
     public void setDefaultCommands() {
-        // drivetrain.setDefaultCommand(driverFullyControlDrivetrain().withName("driveDefualtCommand"));
+        drivetrain.setDefaultCommand(driverFullyControlDrivetrain().withName("driveDefualtCommand"));
         // leds.setDefaultCommand(leds.heartbeatCommand(1.).ignoringDisable(true).withName("ledsDefaultCommand"));
         intake.setDefaultCommand(intake.defaultCommand(pivotKpRad.getEntry().get().getDouble()));
-        // climber.setDefaultCommand(climber.defualtCommand());
+        climber.setDefaultCommand(climber.defualtCommand());
     }
 
 

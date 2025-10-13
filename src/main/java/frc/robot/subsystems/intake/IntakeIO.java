@@ -7,8 +7,8 @@ import edu.wpi.first.math.util.Units;
 public interface IntakeIO {
     @AutoLog
     public class IntakeIOInputs {
-        public double pivotAngleDegrees = 90.0;
-        public double pivotAngleRadians = Units.degreesToRadians(90.0);
+        public double pivotAngleDegrees = -19.0;
+        public double pivotAngleRadians = Units.degreesToRadians(-19.0);
         public double pivotVelocityDegreesPerSecond = 0.0;
         public double pivotAppliedVolts = 0.0;
         public double pivotAmps = 0.0;

@@ -40,6 +40,13 @@ public class Climber extends SubsystemBase {
         io.setLifterNeoVolts(volts);
     }
 
+
+
+    public void setBoth(double liftPos, double suckerVolts) {
+        setLifterPosition(liftPos);
+        io.setSuckerNeoVolts(suckerVolts);
+    }
+
     public void setClimbBoolean(boolean climbing) {
         isClimbing = climbing;
     }
@@ -84,7 +91,7 @@ public class Climber extends SubsystemBase {
     }
 
     public Command defualtCommand() {
-        return this.run(() -> setLifterPosition(90)).alongWith(this.run(() -> setLifterVolts(0)));
+        return this.run(() -> setBoth(90.0,0.0));
     }
 
 }

@@ -53,7 +53,7 @@ public class Intake extends SubsystemBase {
 
         inputs.desiredPivotAngleDeg = desiredPivotAngleDegrees;
         inputs.desiredTopGripperVolts = desiredTopGripperVolts;
-        inputs.desiredBottomGripperVolts = desiredBottomGripperVolts;
+        inputs.desiredBottomGripperVolts = -desiredBottomGripperVolts;
         inputs.hasACoral = hasACoral;
 
         io.updateInputs(inputs);
@@ -61,7 +61,7 @@ public class Intake extends SubsystemBase {
         Logger.processInputs("intakeInputs", inputs);
 
         goToDesiredPivotAngle();
-        // setGripperVolts(inputs.desiredTopGripperVolts, inputs.desiredBottomGripperVolts);
+        setGripperVolts(inputs.desiredTopGripperVolts, inputs.desiredBottomGripperVolts);
     }
 
     public void feedForwardVel(double KvVoltsPerDegPerSec, double desiredDegPerSec) {
@@ -160,10 +160,10 @@ public class Intake extends SubsystemBase {
         // }
         
         if (hasACoral) {
-            // desiredPivotAngleDegrees = IntakeConstants.hasCoralPivotSetpointDeg;
-            // desiredTopGripperVolts = IntakeConstants.holdCoralGripperVolts;
-            // desiredBottomGripperVolts = IntakeConstants.holdCoralGripperVolts;
-            // return;
+            desiredPivotAngleDegrees = IntakeConstants.hasCoralPivotSetpointDeg;
+            desiredTopGripperVolts = IntakeConstants.holdCoralGripperVolts;
+            desiredBottomGripperVolts = IntakeConstants.holdCoralGripperVolts;
+            return;
         } else {
             desiredPivotAngleDegrees = IntakeConstants.noCoralPivotSetpointDeg;
             pChange = newPValue;
@@ -175,14 +175,14 @@ public class Intake extends SubsystemBase {
     }
 
     public void intakeCoral() {
-        if (inputs.aveBottomGripperAmps > 20.0 && inputs.aveTopGripperAmps > 20.0) {
+        if (inputs.aveBottomGripperAmps > 20.0 || inputs.aveTopGripperAmps > 20.0) {
             hasACoral = true;
             defaultFunction(pChange);
             return;
         }
             desiredPivotAngleDegrees = IntakeConstants.intakePivotSetpointDeg;
-            // desiredTopGripperVolts = IntakeConstants.intakingTopGripperVolts;
-            // desiredBottomGripperVolts = IntakeConstants.intakingBottomGripperVolts;
+            desiredTopGripperVolts = IntakeConstants.intakingTopGripperVolts;
+            desiredBottomGripperVolts = IntakeConstants.intakingBottomGripperVolts;
             hasACoral = false;
     }
 

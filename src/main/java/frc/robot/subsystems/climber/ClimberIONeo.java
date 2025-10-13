@@ -62,6 +62,9 @@ public class ClimberIONeo implements ClimberIO{
         
         suckerFollow.configure(configSucker, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
         lifterFollow.configure(configLifter, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+
+        lifter.getEncoder().setPosition(90.0);
+        lifterFollow.getEncoder().setPosition(90.0);
     }
 
     @Override
