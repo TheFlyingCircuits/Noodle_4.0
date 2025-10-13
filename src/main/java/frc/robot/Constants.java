@@ -193,7 +193,7 @@ public final class Constants {
 
         public final static double kSPivotVolts = 0.1; // TODO: all feedforward and PID is filler values besides max theoretical vel
         public final static double kGPivotVolts = 0.22;
-        public final static double kVPivotVoltsSecondsPerRadian = 1.5 * Units.rotationsToRadians((473/60)*pivotGearReduction);
+        public final static double kVPivotVoltsSecondsPerRadian = 1 / Units.rotationsToRadians((473/60)*pivotGearReduction);
         // public final static double kVPivotVoltsSecondsPerRadian = 1.0/Units.degreesToRadians(31.0);
         public final static double kAPivotVoltsSecondsSquaredPerRadian = 0.00;
 

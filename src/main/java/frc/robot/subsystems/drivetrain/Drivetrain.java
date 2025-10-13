@@ -38,6 +38,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.DrivetrainConstants;
 import frc.robot.FlyingCircuitUtils;
 import frc.robot.LimelightHelpers;
+import frc.robot.LimelightHelpers.PoseEstimate;
 import frc.robot.PlayingField.FieldElement;
 import frc.robot.PlayingField.ReefFace;
 
@@ -444,13 +445,19 @@ public class Drivetrain extends SubsystemBase {
 
         Optional <LimelightHelpers.PoseEstimate> mt1Exists = Optional.ofNullable(LimelightHelpers.getBotPoseEstimate_wpiBlue("limelight"));
         boolean doRejectUpdate = false;
+        boolean doesCamExist = true;
+        boolean doesLeftCamExist = true;
+        LimelightHelpers.PoseEstimate mt1 = new PoseEstimate();
+        LimelightHelpers.PoseEstimate mt1LeftCam = new PoseEstimate();
+
         try {
             mt1Exists.get();
         } catch (Exception NoSuchElementException) {
-            return;
+            doesCamExist = false;
         }
+        if(doesCamExist) {
             if(mt1Exists.get() != null) {
-                LimelightHelpers.PoseEstimate mt1 = mt1Exists.get();
+                mt1 = mt1Exists.get();
                 if(mt1.tagCount == 1 && mt1.rawFiducials.length == 1) {   
                     if(mt1.rawFiducials[0].ambiguity > .7) {
                     doRejectUpdate = true;
@@ -459,37 +466,78 @@ public class Drivetrain extends SubsystemBase {
                     doRejectUpdate = true;
                     }
                 }
+            if(mt1.tagCount == 0) {
+                doRejectUpdate = true;
+            }
+            } 
+        }
+        Optional <LimelightHelpers.PoseEstimate> mt1ExistsLeftLimelight = Optional.ofNullable(LimelightHelpers.getBotPoseEstimate_wpiBlue("limelight"));
+        boolean doRejectUpdateFromLeftCam = false;
+        try {
+            mt1ExistsLeftLimelight.get();
+        } catch (Exception NoSuchElementException) {
+            doesLeftCamExist = false;
+        }
+        if(doesLeftCamExist) {
+            if(mt1ExistsLeftLimelight.get() != null) {
+                    mt1LeftCam = mt1ExistsLeftLimelight.get();
+                    if(mt1LeftCam.tagCount == 1 && mt1LeftCam.rawFiducials.length == 1) {   
+                        if(mt1LeftCam.rawFiducials[0].ambiguity > .7) {
+                            doRejectUpdateFromLeftCam = true;
+                        }
+                        if(mt1LeftCam.rawFiducials[0].distToCamera > 3) {
+                            doRejectUpdateFromLeftCam = true;
+                        }
+                    }
+                    if(mt1LeftCam.tagCount == 0) {
+                        doRejectUpdate = true;
+                    }
+                    
+                }
+        }
+
+
+
+        if((doRejectUpdateFromLeftCam && doRejectUpdate) || (!doesCamExist && !doesLeftCamExist)) {
+            return;
+        }
+        if((!doRejectUpdateFromLeftCam && !doRejectUpdate) && (doesCamExist && doesLeftCamExist)) {
+            if(mt1.avgTagDist > mt1LeftCam.avgTagDist) {
+                mt1 = mt1LeftCam;
+            }
+        }
+        if(!doesCamExist) {
+            mt1 = mt1LeftCam;
+        }
 
                         
-                Logger.recordOutput("LimelightEstimatedPose", mt1.pose);
+        Logger.recordOutput("LimelightEstimatedPose", mt1.pose);
         
-                // if our angular velocity is greater than 360 degrees per second, ignore vision updates
+        // if our angular velocity is greater than 360 degrees per second, ignore vision updates
 
-                // cam is 0.371475 up and 0.1043 forward in meters
+        // cam is 0.371475 up and 0.1043 forward in meters
 
-                if(mt1.tagCount == 0) {
-                    doRejectUpdate = true;
-                }
-                if(!doRejectUpdate) {
-                    double slopeStdDevMeters_PerMeter = 0.003;
-                    double tagToCamMeters = mt1.avgTagDist;
-                    if (tagToCamMeters < 1.5) {
-                        slopeStdDevMeters_PerMeter = 0.0;
-                    } else if(tagToCamMeters < 2.5) {
-                        slopeStdDevMeters_PerMeter = 0.001;
-                    }
-            
-                    Matrix<N3, N1> stdDevs = this.fullyTrustVisionNextPoseUpdate ? VecBuilder.fill(0, 0, 0) : VecBuilder.fill(
-                        slopeStdDevMeters_PerMeter*tagToCamMeters, slopeStdDevMeters_PerMeter*tagToCamMeters,9999999);
-                    fusedPoseEstimator.setVisionMeasurementStdDevs(stdDevs);
-                    fusedPoseEstimator.addVisionMeasurement(
-                        mt1.pose,
-                        mt1.timestampSeconds);
-                }
-            } 
-            else {
-                System.out.println("no mt1");
+
+        if(!doRejectUpdate) {
+            double slopeStdDevMeters_PerMeter = 0.003;
+            double tagToCamMeters = mt1.avgTagDist;
+            if (tagToCamMeters < 1.5) {
+                slopeStdDevMeters_PerMeter = 0.0;
+            } else if(tagToCamMeters < 2.5) {
+                slopeStdDevMeters_PerMeter = 0.001;
             }
+    
+            Matrix<N3, N1> stdDevs = this.fullyTrustVisionNextPoseUpdate ? VecBuilder.fill(0, 0, 0) : VecBuilder.fill(
+                slopeStdDevMeters_PerMeter*tagToCamMeters, slopeStdDevMeters_PerMeter*tagToCamMeters,9999999);
+            fusedPoseEstimator.setVisionMeasurementStdDevs(stdDevs);
+            fusedPoseEstimator.addVisionMeasurement(
+                mt1.pose,
+                mt1.timestampSeconds);
+        }
+    
+        else {
+            System.out.println("no mt1");
+        }
 
 
 
