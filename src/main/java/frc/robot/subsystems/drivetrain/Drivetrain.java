@@ -263,7 +263,7 @@ public class Drivetrain extends SubsystemBase {
         this.fieldOrientedDrive(desiredSpeeds, true);
     }
 
-    public boolean isFacingReef() {
+    public boolean isSideFacingReef() {
         // Find the center of the reef, then get the vector from the robot's
         // current location on the field to the reef.
         Translation2d frontFace = FieldElement.FRONT_REEF_FACE.getLocation2d();
@@ -272,13 +272,13 @@ public class Drivetrain extends SubsystemBase {
         Translation2d robotToReef = centerOfReef.minus(getPoseMeters().getTranslation());
 
         // Get the direction the robot is pointed in
-        Rotation2d robotOrientaion = getPoseMeters().getRotation();
+        Rotation2d robotOrientaion = getPoseMeters().getRotation().plus(Rotation2d.kCCW_90deg.plus(Rotation2d.k180deg));
 
         // The robot is considered to be facing the reef if the projection
         // of [the robot's orientation] onto [the vector from the robot to the reef]
         // is positive.
         double dotProduct = (robotOrientaion.getCos() * robotToReef.getX()) + (robotOrientaion.getSin() * robotToReef.getY());
-        return dotProduct > 0;
+        return (dotProduct > 0);
     }
 
     public boolean isAngleAligned() {
@@ -443,7 +443,7 @@ public class Drivetrain extends SubsystemBase {
         fusedPoseEstimator.update(gyroInputs.robotYawRotation2d, getModulePositions());
         wheelsOnlyPoseEstimator.update(gyroInputs.robotYawRotation2d, getModulePositions());
 
-        Optional <LimelightHelpers.PoseEstimate> mt1Exists = Optional.ofNullable(LimelightHelpers.getBotPoseEstimate_wpiBlue("limelight"));
+        Optional <LimelightHelpers.PoseEstimate> mt1Exists = Optional.ofNullable(LimelightHelpers.getBotPoseEstimate_wpiBlue("limelight-right"));
         boolean doRejectUpdate = false;
         boolean doesCamExist = true;
         boolean doesLeftCamExist = true;
@@ -471,7 +471,7 @@ public class Drivetrain extends SubsystemBase {
             }
             } 
         }
-        Optional <LimelightHelpers.PoseEstimate> mt1ExistsLeftLimelight = Optional.ofNullable(LimelightHelpers.getBotPoseEstimate_wpiBlue("limelight"));
+        Optional <LimelightHelpers.PoseEstimate> mt1ExistsLeftLimelight = Optional.ofNullable(LimelightHelpers.getBotPoseEstimate_wpiBlue("limelight-left"));
         boolean doRejectUpdateFromLeftCam = false;
         try {
             mt1ExistsLeftLimelight.get();

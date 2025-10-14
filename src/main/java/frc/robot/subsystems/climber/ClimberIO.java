@@ -35,5 +35,7 @@ public interface ClimberIO {
 
     public default void setLifterNeoVolts(double volts) {};
 
+    public default void setLifterPosition(double positionDeg){};
+
 }
 

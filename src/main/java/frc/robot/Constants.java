@@ -164,18 +164,18 @@ public final class Constants {
         public final static int suckerNeoID = 9;
         public final static int suckerFollowerNeoID = 10;
 
-        public final static double kPLifterVolts = 0.2; //TODO make real
+        public final static double kPLifterVolts = 0.4; //TODO make real
 
         public final static double kPClimbingLifterVoltsPerDegree = 1.0;
         public final static double kDClimbingLifterVoltsPerDegreePerSec = 0.1;
 
-        public final static double aimAtCagePositionDeg = 6.0;
-        public final static double climbingPositionDeg = 100.0;
+        public final static double aimAtCagePositionDeg = 0.0;
+        public final static double climbingPositionDeg = 110.0;
         public final static double climberStartingPositionDeg = 90.0;
-        // 3:1, 7:1, 42:15
-        public final static double lifterGearReduction = (1.0 / 3.0) * (1.0 / 7.0) * (15.0 / 42.0);
+        // 4:1, 4:1, 7:1, 42:15
+        public final static double lifterGearReduction = (1.0 / 4.0) * (1.0 / 4.0) * (1.0 / 7.0) * (15.0 / 42.0);
 
-        public final static double cageDetectedAveAmps = 20.0;
+        public final static double cageDetectedAveAmps = 45.0;
     }
 
     public final static class IntakeConstants {
@@ -184,7 +184,7 @@ public final class Constants {
         public final static int topGripperNeoID = 15;
         public final static int bottomGripperNeoID = 16;
 
-        public final static double maxPivotAngleDegrees = 160;
+        public final static double maxPivotAngleDegrees = 77;
         public final static double minPivotAngleDegrees = -22;
 
 
@@ -194,12 +194,12 @@ public final class Constants {
         public final static double kSPivotVolts = 0.1; // TODO: all feedforward and PID is filler values besides max theoretical vel
         public final static double kGPivotVolts = 0.22;
         //The velocity gain in V/(rad/s).
-        public final static double kVPivotVoltsSecondsPerRadian = 0.85* (1 / Units.rotationsToRadians((473/60)*pivotGearReduction));
+        public final static double kVPivotVoltsSecondsPerRadian = 0.8* (1 / Units.rotationsToRadians((473/60)*pivotGearReduction));
         // public final static double kVPivotVoltsSecondsPerRadian = 1.0/Units.degreesToRadians(31.0);
         public final static double kAPivotVoltsSecondsSquaredPerRadian = 0.00;
 
-        public final static double kPPivotVoltsPerRadian = 2.0;
-        public final static double kDPivotVoltsPerRadianPerSecond = 0.0;
+        public final static double kPPivotVoltsPerRadian = 4.5;
+        public final static double kDPivotVoltsPerRadianPerSecond = 0.1;
 
         // neo max free spinning speed at nominal voltage is 5820 rpm
         // this is theoretical max velocity
@@ -207,7 +207,7 @@ public final class Constants {
         // make rpm rps by /60 then div by gear ratio then converting it to radians by 2pi*
         // public final static double maxPivotVelocityRadianPerSecond = 1.0;
         
-        public final static double maxPivotAccelerationRadianPerSecondSquared = 5; 
+        public final static double maxPivotAccelerationRadianPerSecondSquared = 4.0; 
         // max real accel is prob much more than 10 but will edit when get real robot and we prob dont want full acceleration so we get smooth motion
 
         // Pivot setpoints

@@ -129,8 +129,10 @@ public class RobotContainer {
 
         duncanController.rightTrigger().whileTrue(intake.intakeCommand());
 
-        // duncanController.rightBumper().whileTrue(new L1Score(drivetrain,intake, () -> drivetrain.isFacingReef(), 
-        //     () -> drivetrain.getClosestReefFace(), () -> duncan.getRequestedFieldOrientedVelocity()));
+        duncanController.rightBumper().whileTrue(intake.ejectCoralCommand());
+
+        duncanController.rightBumper().whileTrue(new L1Score(drivetrain,intake, () -> drivetrain.isSideFacingReef(), 
+            () -> drivetrain.getClosestReefFace(), () -> duncan.getRequestedFieldOrientedVelocity()));
         
 
 
@@ -156,21 +158,21 @@ public class RobotContainer {
         // duncanController.povDown().whileTrue(Commands.run(() -> intake.setGripperVolts(-2, -2)));
 
     
-        // duncanController.povRight().whileTrue(new InstantCommand(() -> climber.setClimbBoolean(false))
-        //     .alongWith(new InstantCommand(() -> climber.setManualClimbBoolean(false))))
-        // .onFalse(
-        //     climber.climbCommand()
-        // );
+        duncanController.povRight().whileTrue(new InstantCommand(() -> climber.setClimbBoolean(false))
+            .alongWith(new InstantCommand(() -> climber.setManualClimbBoolean(false))))
+        .onFalse(
+            climber.climbCommand()
+        );
 
-        // duncanController.povLeft().whileTrue(Commands.run(() -> climber.setManualClimbBoolean(true)));
+        duncanController.povLeft().whileTrue(Commands.run(() -> climber.setManualClimbBoolean(true)));
         
-
+        duncanController.povUp().whileTrue(climber.setLifterVoltsCommand(-3)).onFalse(climber.homeClimberCommand(90));
     }
     public void setDefaultCommands() {
-        // drivetrain.setDefaultCommand(driverFullyControlDrivetrain().withName("driveDefualtCommand"));
+        drivetrain.setDefaultCommand(driverFullyControlDrivetrain().withName("driveDefualtCommand"));
         // leds.setDefaultCommand(leds.heartbeatCommand(1.).ignoringDisable(true).withName("ledsDefaultCommand"));
         intake.setDefaultCommand(intake.defaultCommand(pivotKpRad.getEntry().get().getDouble()));
-        // climber.setDefaultCommand(climber.defualtCommand());
+        climber.setDefaultCommand(climber.defualtCommand());
     }
 
 
@@ -209,13 +211,13 @@ public class RobotContainer {
 
         //     leftSideAutoPathfindingPose = ReefFace.FRONT_LEFT_REEF_FACE.getPose2d().plus(new Transform2d(1.5,0, new Rotation2d()));
         // rightSideAutoPathfindingPose = ReefFace.FRONT_RIGHT_REEF_FACE.getPose2d().plus(new Transform2d(1.5,0, new Rotation2d()));
-        L1Score scoreOnClosestFace = new L1Score(drivetrain,intake, () -> drivetrain.isFacingReef(), 
+        L1Score scoreOnClosestFace = new L1Score(drivetrain,intake, () -> drivetrain.isSideFacingReef(), 
             () -> drivetrain.getClosestReefFace(), () -> new ChassisSpeeds());
-        L1Score scoreOnFront = new L1Score(drivetrain,intake, () -> drivetrain.isFacingReef(), 
+        L1Score scoreOnFront = new L1Score(drivetrain,intake, () -> drivetrain.isSideFacingReef(), 
             () -> ReefFace.FRONT_REEF_FACE, () -> new ChassisSpeeds());
-            L1Score scoreOnFront2 = new L1Score(drivetrain,intake, () -> drivetrain.isFacingReef(), 
+            L1Score scoreOnFront2 = new L1Score(drivetrain,intake, () -> drivetrain.isSideFacingReef(), 
             () -> ReefFace.FRONT_REEF_FACE, () -> new ChassisSpeeds());
-        L1Score scoreOnFront3 = new L1Score(drivetrain,intake, () -> drivetrain.isFacingReef(), 
+        L1Score scoreOnFront3 = new L1Score(drivetrain,intake, () -> drivetrain.isSideFacingReef(), 
             () -> ReefFace.FRONT_REEF_FACE, () -> new ChassisSpeeds());
 
         return new SequentialCommandGroup(
@@ -239,13 +241,13 @@ public class RobotContainer {
 
         //     leftSideAutoPathfindingPose = ReefFace.FRONT_LEFT_REEF_FACE.getPose2d().plus(new Transform2d(1.5,0, new Rotation2d()));
         // rightSideAutoPathfindingPose = ReefFace.FRONT_RIGHT_REEF_FACE.getPose2d().plus(new Transform2d(1.5,0, new Rotation2d()));
-        L1Score scoreOnClosestFace = new L1Score(drivetrain,intake, () -> drivetrain.isFacingReef(), 
+        L1Score scoreOnClosestFace = new L1Score(drivetrain,intake, () -> drivetrain.isSideFacingReef(), 
             () -> drivetrain.getClosestReefFace(), () -> new ChassisSpeeds());
-        L1Score scoreOnFront = new L1Score(drivetrain,intake, () -> drivetrain.isFacingReef(), 
+        L1Score scoreOnFront = new L1Score(drivetrain,intake, () -> drivetrain.isSideFacingReef(), 
             () -> ReefFace.FRONT_REEF_FACE, () -> new ChassisSpeeds());
-        L1Score scoreOnFront2 = new L1Score(drivetrain,intake, () -> drivetrain.isFacingReef(), 
+        L1Score scoreOnFront2 = new L1Score(drivetrain,intake, () -> drivetrain.isSideFacingReef(), 
             () -> ReefFace.FRONT_REEF_FACE, () -> new ChassisSpeeds());
-        L1Score scoreOnFront3 = new L1Score(drivetrain,intake, () -> drivetrain.isFacingReef(), 
+        L1Score scoreOnFront3 = new L1Score(drivetrain,intake, () -> drivetrain.isSideFacingReef(), 
             () -> ReefFace.FRONT_REEF_FACE, () -> new ChassisSpeeds());
             
         return new SequentialCommandGroup(

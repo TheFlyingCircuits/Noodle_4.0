@@ -40,8 +40,6 @@ public class Climber extends SubsystemBase {
         io.setLifterNeoVolts(volts);
     }
 
-
-
     public void setBoth(double liftPos, double suckerVolts) {
         setLifterPosition(liftPos);
         io.setSuckerNeoVolts(suckerVolts);
@@ -62,9 +60,16 @@ public class Climber extends SubsystemBase {
     }
 
     public void setClimbPosition(double desiredClimbDegrees) {
-        double lifterPIDOutputVolts = climbPID.calculate(inputs.lifterAngleDeg, desiredClimbDegrees);
+        double voltageOutput;
+        // if(80 < inputs.lifterAngleDeg && inputs.lifterAngleDeg < 100){
+        //     voltageOutput = MathUtil.clamp(climbPID.calculate(inputs.lifterAngleDeg, desiredClimbDegrees)
+        //     ,1.0,6.0);
+        // } else {
+        //     voltageOutput = climbPID.calculate(inputs.lifterAngleDeg, desiredClimbDegrees);
+        // }
+        voltageOutput = climbPID.calculate(inputs.lifterAngleDeg, desiredClimbDegrees);
 
-        setLifterVolts(lifterPIDOutputVolts);
+        setLifterVolts(voltageOutput);
     }
 
     public void climb() {
@@ -72,14 +77,28 @@ public class Climber extends SubsystemBase {
         if ((inputs.suckerAveAmps > ClimberConstants.cageDetectedAveAmps || inputs.suckerFollowerAveAmps > ClimberConstants.cageDetectedAveAmps)
         || isClimbing || manualClimbOveride ) {
             setClimbPosition(ClimberConstants.climbingPositionDeg);
-            setSuckerVolts(-1);
+            setSuckerVolts(0);
             isClimbing = true;
             return;
         }
 
         setLifterPosition(ClimberConstants.aimAtCagePositionDeg);
-        setSuckerVolts(-12);
+        setSuckerVolts(-10);
 
+    }
+
+    public void homeClimber(double positionDeg){
+        // sets the Actuall position for homing
+        io.setLifterNeoVolts(0);
+        io.setLifterPosition(positionDeg);
+    }
+
+    public Command setLifterVoltsCommand(double volts) {
+        return this.run(() -> setLifterVolts(volts));
+    }
+
+    public Command homeClimberCommand(double angleDeg) {
+        return this.run(() -> homeClimber(angleDeg));
     }
 
     public Command climbCommand() {

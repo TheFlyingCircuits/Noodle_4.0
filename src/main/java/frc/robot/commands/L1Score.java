@@ -40,7 +40,7 @@ public class L1Score extends Command {
     private Pose2d adjustedReefScoringPose(ReefFace face, boolean isFacingForward, ChassisSpeeds overideY) {
         // double adjustedX = FieldConstants.stalkInsetMeters;        // puts center of robot at the outer edge of the reef
         double adjustedX = DrivetrainConstants.bumperWidthMeters / 2.0;  // move back a half bumper length so the bumper is touching the edge of the reef
-        adjustedX += 0.2; // measure this manually
+        adjustedX += 0.4; // measure this manually
 
         Pose2d targetPose = face.getPose2d();
 
@@ -69,9 +69,14 @@ public class L1Score extends Command {
         
         Rotation2d rotationAdjustment;
         if (isFacingForward) {
+            System.out.println("facing reef");
             rotationAdjustment = Rotation2d.k180deg;
+            // rotationAdjustment = new Rotation2d().minus(Rotation2d.kCW_90deg.plus(Rotation2d.k180deg));
+            // rotationAdjustment = new Rotation2d();
         } else {
+            System.out.println("Not");
             rotationAdjustment = Rotation2d.kZero;
+            // rotationAdjustment = new Rotation2d().minus(Rotation2d.kCW_90deg);
         }
 
 
