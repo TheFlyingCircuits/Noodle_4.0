@@ -129,7 +129,7 @@ public class RobotContainer {
 
         duncanController.rightTrigger().whileTrue(intake.intakeCommand());
 
-        duncanController.rightBumper().whileTrue(intake.ejectCoralCommand());
+        duncanController.leftBumper().whileTrue(intake.ejectCoralCommand());
 
         duncanController.rightBumper().whileTrue(new L1Score(drivetrain,intake, () -> drivetrain.isSideFacingReef(), 
             () -> drivetrain.getClosestReefFace(), () -> duncan.getRequestedFieldOrientedVelocity()));
@@ -162,6 +162,7 @@ public class RobotContainer {
             .alongWith(new InstantCommand(() -> climber.setManualClimbBoolean(false))))
         .onFalse(
             climber.climbCommand()
+            .alongWith(intake.intakeClimbCommand())
         );
 
         duncanController.povLeft().whileTrue(Commands.run(() -> climber.setManualClimbBoolean(true)));

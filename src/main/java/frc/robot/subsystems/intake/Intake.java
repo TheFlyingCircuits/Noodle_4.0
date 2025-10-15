@@ -4,6 +4,7 @@ import java.util.function.Supplier;
 
 import org.littletonrobotics.junction.Logger;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
@@ -42,6 +43,8 @@ public class Intake extends SubsystemBase {
 
     boolean shouldSetNoVolts = false;
 
+    boolean currentlyIntaking = false;
+
 
     public Intake(IntakeIO io) {
         this.io = io;
@@ -53,6 +56,7 @@ public class Intake extends SubsystemBase {
             new TrapezoidProfile.Constraints(IntakeConstants.maxPivotVelocityRadianPerSecond, IntakeConstants.maxPivotAccelerationRadianPerSecondSquared));
         pivotProfile = new TrapezoidProfile(new TrapezoidProfile.Constraints(IntakeConstants.maxPivotVelocityRadianPerSecond, IntakeConstants.maxPivotAccelerationRadianPerSecondSquared));
         pivotPID = new PIDController(IntakeConstants.kPPivotVoltsPerRadian, 0, IntakeConstants.kDPivotVoltsPerRadianPerSecond);
+        pivotPID.setTolerance(0.1);
         timer.start();
 
         // pivotProfiledPID.setTolerance(0); // 0.3 deg tolerance
@@ -73,7 +77,7 @@ public class Intake extends SubsystemBase {
 
         Logger.processInputs("intakeInputs", inputs);
 
-        goToDesiredPivotAngle();
+        goToDesiredPivotAngle(currentlyIntaking);
         setGripperVolts(inputs.desiredTopGripperVolts, inputs.desiredBottomGripperVolts);
     }
 
@@ -117,7 +121,7 @@ public class Intake extends SubsystemBase {
         return inputs.hasACoral;
     }
 
-    public void goToDesiredPivotAngle() {
+    public void goToDesiredPivotAngle(boolean isIntaking) {
         // System.out.println(-(Units.degreesToRadians(desiredPivotAngleDegrees) - inputs.pivotAngleRadians));
         // pivotProfiledPID.setP(pChange);
         // if (shouldSetNoVolts) {
@@ -135,9 +139,13 @@ public class Intake extends SubsystemBase {
              new TrapezoidProfile.State(Units.degreesToRadians(inputs.desiredPivotAngleDeg), 0));
 
         double pIDOutputVolts = pivotPID.calculate(Units.degreesToRadians(inputs.pivotAngleDegrees), Units.degreesToRadians(inputs.desiredPivotAngleDeg));
+        double setpointVel = profileSetpointVelRadPerSec.velocity;
+        if(Math.abs(inputs.desiredPivotAngleDeg - inputs.pivotAngleDegrees) < 2) {
+            setpointVel = 0;
+        } 
         // double profileSetpointVelRadPerSec = pivotProfile.getSetpoint().velocity;
         // get acceleration by delta velcocity from thisloop-last loop divided by delta time from thislooptime-lastlooptime
-        double feedForwardVolts = pivotFeedForward.calculate(inputs.pivotAngleRadians, profileSetpointVelRadPerSec.velocity);
+        double feedForwardVolts = pivotFeedForward.calculate(inputs.pivotAngleRadians, setpointVel);
         // double feedForwardVolts = pivotFeedForward.calculate(inputs.pivotAngleRadians, profileSetpointVelRadPerSec);
         Logger.recordOutput("goToDesiredPos/ pidOutputVolts", pIDOutputVolts);
         Logger.recordOutput("goToDesiredPos/ feedForwardVolts", feedForwardVolts);
@@ -152,8 +160,11 @@ public class Intake extends SubsystemBase {
 
         // System.out.println(feedForwardVolts);
         // System.out.println(profilePIDOutputVolts);
-
-        setPivotVolts(pIDOutputVolts + feedForwardVolts);
+        double outputVoltsCombined = pIDOutputVolts + feedForwardVolts;
+        if(isIntaking) {
+            outputVoltsCombined = MathUtil.clamp(outputVoltsCombined, -12,-1);
+        }
+        setPivotVolts(outputVoltsCombined);
     }
 
     public void score(Supplier<Boolean> facingReef, boolean readyToScore) {
@@ -174,18 +185,25 @@ public class Intake extends SubsystemBase {
 
     }
 
-    public void defaultFunction(double newPValue) {
+    public void defaultFunction(double newPValue, boolean isInIntakeFunction) {
         // TODO: find real amp values for when we have and don't have a coral
         // if(hasACoral && (inputs.aveBottomGripperAmps < 10.0 && inputs.aveTopGripperAmps < 10.0)) { // if we have low amps while trying to grip we prob dont have coral
         //     hasACoral = false; // this is for if we drop the coral while doing defualt command the code adjusts by itself
         // }
+        currentlyIntaking = false;
         shouldSetNoVolts = false;
         io.setCoastMode(false);
         if (hasACoral) {
+            if(isInIntakeFunction) {
+                desiredPivotAngleDegrees = IntakeConstants.hasCoralPivotSetpointDeg;
+                desiredBottomGripperVolts = 0;
+                desiredTopGripperVolts = IntakeConstants.intakingTopGripperVolts;
+                return;
+            }
             desiredPivotAngleDegrees = IntakeConstants.hasCoralPivotSetpointDeg;
             desiredBottomGripperVolts = IntakeConstants.holdCoralGripperVolts;
             desiredTopGripperVolts = Math.abs(desiredPivotAngleDegrees - inputs.pivotAngleDegrees) < 5?
-                IntakeConstants.intakingTopGripperVolts : IntakeConstants.holdCoralGripperVolts;
+                IntakeConstants.intakingTopGripperVolts + 8: IntakeConstants.holdCoralGripperVolts;
             return;
         } else {
             desiredPivotAngleDegrees = IntakeConstants.noCoralPivotSetpointDeg;
@@ -198,10 +216,11 @@ public class Intake extends SubsystemBase {
     }
 
     public void intakeCoral() {
+        currentlyIntaking = true;
         io.setCoastMode(true);
-        if (inputs.aveBottomGripperAmps > 20.0 || inputs.aveTopGripperAmps > 20.0) {
+        if (inputs.aveBottomGripperAmps > 40.0 || inputs.aveTopGripperAmps > 40.0) {
             hasACoral = true;
-            defaultFunction(pChange);
+            defaultFunction(pChange, true);
             return;
         }
 
@@ -219,6 +238,10 @@ public class Intake extends SubsystemBase {
         desiredBottomGripperVolts = IntakeConstants.frontScoreBottomGripperVolts;
     }
 
+    public void intakeClimbPos(){
+        desiredPivotAngleDegrees = 0;
+    }
+
 
     public Command setTargetAngleDegCommand(double degrees) {
         return this.run(() -> setPivotTargetAngleDegrees(degrees));
@@ -233,7 +256,7 @@ public class Intake extends SubsystemBase {
     }
 
     public Command defaultCommand(double newPValue) {
-        return this.run(() -> defaultFunction(newPValue));
+        return this.run(() -> defaultFunction(newPValue, false));
     }
 
     public Command intakeCommand() {
@@ -246,5 +269,9 @@ public class Intake extends SubsystemBase {
 
     public Command ejectCoralCommand() {
         return this.run(() -> ejectCoral());
+    }
+
+    public Command intakeClimbCommand() {
+        return this.run(() -> intakeClimbPos());
     }
 }

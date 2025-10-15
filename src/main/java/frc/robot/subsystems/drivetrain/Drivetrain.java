@@ -41,6 +41,7 @@ import frc.robot.LimelightHelpers;
 import frc.robot.LimelightHelpers.PoseEstimate;
 import frc.robot.PlayingField.FieldElement;
 import frc.robot.PlayingField.ReefFace;
+import frc.robot.PlayingField.ReefStalk;
 
 
 public class Drivetrain extends SubsystemBase {
@@ -121,7 +122,7 @@ public class Drivetrain extends SubsystemBase {
         angleController.setTolerance(1); // degrees, degreesPerSecond.
 
         translationController = new PIDController(4, 0, 0.15); // kP has units of metersPerSecond per meter of error.
-        translationController.setTolerance(0.06, 1.0); // meters, metersPerSecond
+        translationController.setTolerance(0.04, 1.0); // meters, metersPerSecond
         // TODO: real tolerance used to be .02 but changed to .06 for sim
 
         SmartDashboard.putData("drivetrain/angleController", angleController);
@@ -606,6 +607,10 @@ public class Drivetrain extends SubsystemBase {
     }
     public FieldElement getClosestLoadingStation() {
         return this.getClosestFieldElement(FieldElement.ALL_LOADING_STATIONS);
+    }
+
+    public ReefStalk getClosestReefStalk() {
+        return (ReefStalk) this.getClosestFieldElement(FieldElement.ALL_STALKS);
     }
 
     @Override

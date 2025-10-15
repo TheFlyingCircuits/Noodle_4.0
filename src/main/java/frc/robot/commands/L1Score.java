@@ -4,13 +4,11 @@ import java.util.function.Supplier;
 
 import org.littletonrobotics.junction.Logger;
 
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.DrivetrainConstants;
@@ -26,6 +24,8 @@ public class L1Score extends Command {
     private Supplier<Boolean> ifFacingReef;
     private Timer scoringTimer;
     private boolean timerHasNotStarted = true;
+    private boolean isGoingForLeft;
+    
 
     public L1Score(Drivetrain drivetrain, Intake intake, Supplier<Boolean> ifFacingReef, Supplier<ReefFace> faceScoringOn, Supplier<ChassisSpeeds> driverRequestedVel) {
         this.drivetrain=drivetrain;
@@ -34,55 +34,87 @@ public class L1Score extends Command {
         this.faceScoringOn=faceScoringOn;
         this.driverRequestedVel=driverRequestedVel;
         scoringTimer = new Timer();
+        isGoingForLeft = drivetrain.getClosestReefStalk() == faceScoringOn.get().getLeftStalk();
         addRequirements(drivetrain, intake);
     }
 
     private Pose2d adjustedReefScoringPose(ReefFace face, boolean isFacingForward, ChassisSpeeds overideY) {
         // double adjustedX = FieldConstants.stalkInsetMeters;        // puts center of robot at the outer edge of the reef
         double adjustedX = DrivetrainConstants.bumperWidthMeters / 2.0;  // move back a half bumper length so the bumper is touching the edge of the reef
-        adjustedX += 0.4; // measure this manually
+        if(isFacingForward){
+            adjustedX += 0.2; // measure this manually
+        } else {
+            adjustedX += -0.05;
+        }
+
+        double adjustedY;
+        boolean noChangeInY = overideY.vyMetersPerSecond == 0;
+        boolean isYPositive = overideY.vyMetersPerSecond >= 0;
+
+        if (face == ReefFace.BACK_REEF_FACE || face == ReefFace.BACK_LEFT_REEF_FACE || face == ReefFace.BACK_RIGHT_REEF_FACE) {
+            isYPositive = !isYPositive;
+        }
 
         Pose2d targetPose = face.getPose2d();
 
-        double adjustedY = targetPose.minus(drivetrain.getPoseMeters()).getY();
+        Translation2d vectorRobotToReef = targetPose.getTranslation().minus(drivetrain.getPoseMeters().getTranslation());
 
-        if (DriverStation.getAlliance().get() == Alliance.Red) {
-            adjustedY = -adjustedY;
-        }
+        // double adjustedY = face.getPose2d().getRotation().minus(
+        //     vectorRobotToReef.getAngle().plus(Rotation2d.k180deg)).getDegrees();
+        
 
-        if (!isFacingForward) {
-            adjustedY = -adjustedY;
-        }
-        adjustedY = MathUtil.clamp(adjustedY, -0.4, 0.4);
+        // adjustedY = adjustedY/85.0;
+
+        // double adjustedY = lastAdjustedY;
+        // if (DriverStation.getAlliance().get() == Alliance.Red) {
+        //     adjustedY = -adjustedY;
+        // }
+
+        // adjustedY = MathUtil.clamp(adjustedY, -0.4, 0.4);
         // double adjustedY = 0;
 
 
-        if (face == ReefFace.FRONT_REEF_FACE || face == ReefFace.FRONT_LEFT_REEF_FACE || face == ReefFace.FRONT_RIGHT_REEF_FACE) {
-            adjustedY += -overideY.vyMetersPerSecond / 12;
-        } else {
-            adjustedY += overideY.vyMetersPerSecond / 12;
+        // if (face == ReefFace.FRONT_REEF_FACE || face == ReefFace.FRONT_LEFT_REEF_FACE || face == ReefFace.FRONT_RIGHT_REEF_FACE) {
+        //     adjustedY += overideY.vyMetersPerSecond / 12.0;
+        // } else {
+        //     adjustedY += -overideY.vyMetersPerSecond / 12.0;
+        // }
+
+
+        // adjustedY = MathUtil.clamp(adjustedY, -0.4, 0.4);
+        // System.out.println(adjustedY);
+
+        if(!noChangeInY) {
+            isGoingForLeft = isYPositive;
         }
 
 
-        adjustedY = MathUtil.clamp(adjustedY, -0.4, 0.4);
+        adjustedY = isGoingForLeft? 0.075 : -0.425;
+
+        adjustedY = !isFacingForward && isGoingForLeft? 0.225 : -0.275;
+
+
+
+
 
         
         Rotation2d rotationAdjustment;
         if (isFacingForward) {
-            System.out.println("facing reef");
-            rotationAdjustment = Rotation2d.k180deg;
-            // rotationAdjustment = new Rotation2d().minus(Rotation2d.kCW_90deg.plus(Rotation2d.k180deg));
+            // System.out.println("facing reef");
+            // rotationAdjustment = Rotation2d.k180deg;
+            rotationAdjustment = new Rotation2d().minus(Rotation2d.kCW_90deg.plus(Rotation2d.k180deg));
             // rotationAdjustment = new Rotation2d();
         } else {
-            System.out.println("Not");
-            rotationAdjustment = Rotation2d.kZero;
-            // rotationAdjustment = new Rotation2d().minus(Rotation2d.kCW_90deg);
+            // System.out.println("Not");
+            // rotationAdjustment = Rotation2d.kZero;
+            rotationAdjustment = new Rotation2d().minus(Rotation2d.kCW_90deg);
         }
 
 
 
-        Transform2d targetPoseToRobotRelativeToStalk = new Transform2d(adjustedX, adjustedY, rotationAdjustment);
+        Transform2d targetPoseToRobotRelativeToStalk = new Transform2d(adjustedX, adjustedY, new Rotation2d());
         Pose2d scoringPose = targetPose.plus(targetPoseToRobotRelativeToStalk);
+        scoringPose = new Pose2d(scoringPose.getTranslation(), scoringPose.getRotation().plus(rotationAdjustment));
         // Logger.recordOutput("L1Scoring/targetDrivePose", scoringPose);
         return scoringPose;
     }
@@ -99,6 +131,7 @@ public class L1Score extends Command {
         Logger.recordOutput("L1Scoring/targetDrivePose", adjustedPose);
 
         boolean closeToReef = adjustedPose.minus(drivetrain.getPoseMeters()).getTranslation().getNorm() < 1;
+        
         if (!closeToReef) {
             drivetrain.profileToPose(adjustedPose);
         } else {
