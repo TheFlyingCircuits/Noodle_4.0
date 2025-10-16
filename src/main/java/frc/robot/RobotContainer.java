@@ -60,6 +60,7 @@ public class RobotContainer {
   
     public Pose2d leftSideAutoPathfindingPose;
     public Pose2d rightSideAutoPathfindingPose;
+    private boolean manualScoringOveride = false;
 
     // public SimpleWidget pValueChange;
     public SimpleWidget pivotKpRad;
@@ -125,14 +126,16 @@ public class RobotContainer {
         // duncanController.a().whileTrue(Commands.run(() -> intake.setPivotVolts(((pivotSettingVoltage.getEntry().get().getDouble())))));
         // duncanController.a().whileTrue(Commands.run(() -> intake.setPivotTargetAngleDegrees(pivotDesiredDeg.getEntry().get().getDouble())).alongWith(
             // Commands.run(() -> intake.goToDesiredPivotAngle(pivotKpRad.getEntry().get().getDouble()))));
-        duncanController.b().whileTrue(intake.setPivotVoltsCommand(0));
 
         duncanController.rightTrigger().whileTrue(intake.intakeCommand());
+
+        duncanController.b().whileTrue(Commands.run(() ->manualScoringOveride = true)).whileFalse(Commands.run(() ->manualScoringOveride = false));
 
         duncanController.leftBumper().whileTrue(intake.ejectCoralCommand());
 
         duncanController.rightBumper().whileTrue(new L1Score(drivetrain,intake, () -> drivetrain.isSideFacingReef(), 
-            () -> drivetrain.getClosestReefFace(), () -> duncan.getRequestedFieldOrientedVelocity(),() -> drivetrain.getClosestReefStalk() == drivetrain.getClosestReefFace().getLeftStalk()));
+            () -> drivetrain.getClosestReefFace(), () -> duncan.getRequestedFieldOrientedVelocity(),
+                () -> drivetrain.getClosestReefStalk() == drivetrain.getClosestReefFace().getLeftStalk(), manualScoringOveride));
         
 
 
@@ -213,13 +216,13 @@ public class RobotContainer {
         //     leftSideAutoPathfindingPose = ReefFace.FRONT_LEFT_REEF_FACE.getPose2d().plus(new Transform2d(1.5,0, new Rotation2d()));
         // rightSideAutoPathfindingPose = ReefFace.FRONT_RIGHT_REEF_FACE.getPose2d().plus(new Transform2d(1.5,0, new Rotation2d()));
         L1Score scoreOnClosestFace = new L1Score(drivetrain,intake, () -> drivetrain.isSideFacingReef(), 
-            () -> drivetrain.getClosestReefFace(), () -> new ChassisSpeeds(),() -> drivetrain.getClosestReefStalk() == drivetrain.getClosestReefFace().getLeftStalk());
+            () -> drivetrain.getClosestReefFace(), () -> new ChassisSpeeds(),() -> drivetrain.getClosestReefStalk() == drivetrain.getClosestReefFace().getLeftStalk(),false);
         L1Score scoreOnFront = new L1Score(drivetrain,intake, () -> drivetrain.isSideFacingReef(), 
-            () -> ReefFace.FRONT_REEF_FACE, () -> new ChassisSpeeds(),() -> drivetrain.getClosestReefStalk() == ReefFace.FRONT_REEF_FACE.getLeftStalk());
+            () -> ReefFace.FRONT_REEF_FACE, () -> new ChassisSpeeds(),() -> drivetrain.getClosestReefStalk() == ReefFace.FRONT_REEF_FACE.getLeftStalk(), false);
             L1Score scoreOnFront2 = new L1Score(drivetrain,intake, () -> drivetrain.isSideFacingReef(), 
-            () -> ReefFace.FRONT_REEF_FACE, () -> new ChassisSpeeds(),() -> drivetrain.getClosestReefStalk() == ReefFace.FRONT_REEF_FACE.getLeftStalk());
+            () -> ReefFace.FRONT_REEF_FACE, () -> new ChassisSpeeds(),() -> drivetrain.getClosestReefStalk() == ReefFace.FRONT_REEF_FACE.getLeftStalk(),false);
         L1Score scoreOnFront3 = new L1Score(drivetrain,intake, () -> drivetrain.isSideFacingReef(), 
-            () -> ReefFace.FRONT_REEF_FACE, () -> new ChassisSpeeds(),() -> drivetrain.getClosestReefStalk() == ReefFace.FRONT_REEF_FACE.getLeftStalk());
+            () -> ReefFace.FRONT_REEF_FACE, () -> new ChassisSpeeds(),() -> drivetrain.getClosestReefStalk() == ReefFace.FRONT_REEF_FACE.getLeftStalk(),false);
 
         return new SequentialCommandGroup(
             pathfindToPose(ReefFace.FRONT_LEFT_REEF_FACE.getPose2d().plus(new Transform2d(1.5,0, new Rotation2d()))).alongWith(intake.defaultCommand(0)).until(
@@ -243,13 +246,13 @@ public class RobotContainer {
         //     leftSideAutoPathfindingPose = ReefFace.FRONT_LEFT_REEF_FACE.getPose2d().plus(new Transform2d(1.5,0, new Rotation2d()));
         // rightSideAutoPathfindingPose = ReefFace.FRONT_RIGHT_REEF_FACE.getPose2d().plus(new Transform2d(1.5,0, new Rotation2d()));
         L1Score scoreOnClosestFace = new L1Score(drivetrain,intake, () -> drivetrain.isSideFacingReef(), 
-            () -> drivetrain.getClosestReefFace(), () -> new ChassisSpeeds(),() -> drivetrain.getClosestReefStalk() == drivetrain.getClosestReefFace().getLeftStalk());
+            () -> drivetrain.getClosestReefFace(), () -> new ChassisSpeeds(),() -> drivetrain.getClosestReefStalk() == drivetrain.getClosestReefFace().getLeftStalk(),false);
         L1Score scoreOnFront = new L1Score(drivetrain,intake, () -> drivetrain.isSideFacingReef(), 
-            () -> ReefFace.FRONT_REEF_FACE, () -> new ChassisSpeeds(),() -> drivetrain.getClosestReefStalk() == ReefFace.FRONT_REEF_FACE.getLeftStalk());
+            () -> ReefFace.FRONT_REEF_FACE, () -> new ChassisSpeeds(),() -> drivetrain.getClosestReefStalk() == ReefFace.FRONT_REEF_FACE.getLeftStalk(),false);
         L1Score scoreOnFront2 = new L1Score(drivetrain,intake, () -> drivetrain.isSideFacingReef(), 
-            () -> ReefFace.FRONT_REEF_FACE, () -> new ChassisSpeeds(),() -> drivetrain.getClosestReefStalk() == ReefFace.FRONT_REEF_FACE.getLeftStalk());
+            () -> ReefFace.FRONT_REEF_FACE, () -> new ChassisSpeeds(),() -> drivetrain.getClosestReefStalk() == ReefFace.FRONT_REEF_FACE.getLeftStalk(),false);
         L1Score scoreOnFront3 = new L1Score(drivetrain,intake, () -> drivetrain.isSideFacingReef(), 
-            () -> ReefFace.FRONT_REEF_FACE, () -> new ChassisSpeeds(),() -> drivetrain.getClosestReefStalk() == ReefFace.FRONT_REEF_FACE.getLeftStalk());
+            () -> ReefFace.FRONT_REEF_FACE, () -> new ChassisSpeeds(),() -> drivetrain.getClosestReefStalk() == ReefFace.FRONT_REEF_FACE.getLeftStalk(),false);
             
         return new SequentialCommandGroup(
             pathfindToPose(ReefFace.FRONT_RIGHT_REEF_FACE.getPose2d().plus(new Transform2d(1.5,0, new Rotation2d()))).alongWith(intake.defaultCommand(0)).until(

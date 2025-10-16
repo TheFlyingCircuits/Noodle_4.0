@@ -26,14 +26,17 @@ public class L1Score extends Command {
     private Timer scoringTimer;
     private boolean timerHasNotStarted = true;
     private boolean isGoingForLeft;
+    private boolean manualScoreOveride;
     
 
-    public L1Score(Drivetrain drivetrain, Intake intake, Supplier<Boolean> ifFacingReef, Supplier<ReefFace> faceScoringOn, Supplier<ChassisSpeeds> driverRequestedVel, Supplier<Boolean> isClosestStalkLeft) {
+    public L1Score(Drivetrain drivetrain, Intake intake, Supplier<Boolean> ifFacingReef, Supplier<ReefFace> faceScoringOn, 
+        Supplier<ChassisSpeeds> driverRequestedVel, Supplier<Boolean> isClosestStalkLeft, boolean manualScoreOveride) {
         this.drivetrain=drivetrain;
         this.intake=intake;
         this.ifFacingReef=ifFacingReef;
         this.faceScoringOn=faceScoringOn;
         this.driverRequestedVel=driverRequestedVel;
+        this.manualScoreOveride=manualScoreOveride;
         scoringTimer = new Timer();
         isGoingForLeft = isClosestStalkLeft.get();
         addRequirements(drivetrain, intake);
@@ -143,6 +146,9 @@ public class L1Score extends Command {
         // drivetrain.pidToPose(adjustedPose, 2.0);
 
         boolean readyToScore = basicallyAtScoringSetpoint && drivetrain.isAngleAligned();
+        if(manualScoreOveride){
+            readyToScore= true;
+        }
         System.out.println(readyToScore);
         intake.score(ifFacingReef, readyToScore);
         
