@@ -26,11 +26,11 @@ public class L1Score extends Command {
     private Timer scoringTimer;
     private boolean timerHasNotStarted = true;
     private boolean isGoingForLeft;
-    private boolean manualScoreOveride;
+    private Supplier<Boolean> manualScoreOveride;
     
 
     public L1Score(Drivetrain drivetrain, Intake intake, Supplier<Boolean> ifFacingReef, Supplier<ReefFace> faceScoringOn, 
-        Supplier<ChassisSpeeds> driverRequestedVel, Supplier<Boolean> isClosestStalkLeft, boolean manualScoreOveride) {
+        Supplier<ChassisSpeeds> driverRequestedVel, Supplier<Boolean> isClosestStalkLeft, Supplier<Boolean> manualScoreOveride) {
         this.drivetrain=drivetrain;
         this.intake=intake;
         this.ifFacingReef=ifFacingReef;
@@ -48,7 +48,7 @@ public class L1Score extends Command {
         if(isFacingForward){
             adjustedX += 0.2; // measure this manually
         } else {
-            adjustedX += -0.05;
+            adjustedX += -0.075;
         }
 
         double adjustedY;
@@ -96,10 +96,10 @@ public class L1Score extends Command {
             isGoingForLeft = isYPositive;
         }
 
-        if(isFacingForward) {
-            adjustedY = isGoingForLeft? 0.075 : -0.425;
+        if(isFacingForward) { // .25 each way +- .125
+            adjustedY = isGoingForLeft? 0.125 : -0.375;
         } else{
-            adjustedY = isGoingForLeft? 0.225 : -0.275;
+            adjustedY = isGoingForLeft? 0.375 : -0.125;
         }
         
         Rotation2d rotationAdjustment;
@@ -145,11 +145,17 @@ public class L1Score extends Command {
         }
         // drivetrain.pidToPose(adjustedPose, 2.0);
 
-        boolean readyToScore = basicallyAtScoringSetpoint && drivetrain.isAngleAligned();
-        if(manualScoreOveride){
+        boolean readyToScore = drivetrain.translationControllerAtSetpoint() && drivetrain.isAngleAligned();
+        Logger.recordOutput("L1Scoring/readyToScore", readyToScore);
+        Logger.recordOutput("L1Scoring/isAngleAligned", drivetrain.isAngleAligned());
+        Logger.recordOutput("L1Scoring/translationControllerAtSetpoint", drivetrain.translationControllerAtSetpoint());
+        if(manualScoreOveride.get()){
+            Logger.recordOutput("L1Scoring/manualOveride", true);
             readyToScore= true;
+        } else {
+            Logger.recordOutput("L1Scoring/manualOveride", false);
         }
-        System.out.println(readyToScore);
+        // System.out.println(readyToScore);
         intake.score(ifFacingReef, readyToScore);
         
         if(readyToScore && timerHasNotStarted) {

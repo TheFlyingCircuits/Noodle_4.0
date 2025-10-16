@@ -64,11 +64,11 @@ public class Climber extends SubsystemBase {
         double voltageOutput;
         if(80 < inputs.lifterAngleDeg && inputs.lifterAngleDeg < 110){
             voltageOutput = MathUtil.clamp(climbPID.calculate(inputs.lifterAngleDeg, desiredClimbDegrees)
-            ,-1.0,8.0);
+            ,-1.0,4.0);
         } else {
             // voltageOutput = climbPID.calculate(inputs.lifterAngleDeg, desiredClimbDegrees);
             voltageOutput = MathUtil.clamp(climbPID.calculate(inputs.lifterAngleDeg, desiredClimbDegrees)
-            ,-1.0,8.0);
+            ,-1.0,4.0);
         }
         // voltageOutput = climbPID.calculate(inputs.lifterAngleDeg, desiredClimbDegrees);
 

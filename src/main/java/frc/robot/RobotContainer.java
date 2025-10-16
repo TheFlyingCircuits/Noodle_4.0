@@ -135,7 +135,7 @@ public class RobotContainer {
 
         duncanController.rightBumper().whileTrue(new L1Score(drivetrain,intake, () -> drivetrain.isSideFacingReef(), 
             () -> drivetrain.getClosestReefFace(), () -> duncan.getRequestedFieldOrientedVelocity(),
-                () -> drivetrain.getClosestReefStalk() == drivetrain.getClosestReefFace().getLeftStalk(), manualScoringOveride));
+                () -> drivetrain.getClosestReefStalk() == drivetrain.getClosestReefFace().getLeftStalk(), () -> manualScoringOveride));
         
 
 
@@ -216,13 +216,13 @@ public class RobotContainer {
         //     leftSideAutoPathfindingPose = ReefFace.FRONT_LEFT_REEF_FACE.getPose2d().plus(new Transform2d(1.5,0, new Rotation2d()));
         // rightSideAutoPathfindingPose = ReefFace.FRONT_RIGHT_REEF_FACE.getPose2d().plus(new Transform2d(1.5,0, new Rotation2d()));
         L1Score scoreOnClosestFace = new L1Score(drivetrain,intake, () -> drivetrain.isSideFacingReef(), 
-            () -> drivetrain.getClosestReefFace(), () -> new ChassisSpeeds(),() -> drivetrain.getClosestReefStalk() == drivetrain.getClosestReefFace().getLeftStalk(),false);
+            () -> drivetrain.getClosestReefFace(), () -> new ChassisSpeeds(),() -> drivetrain.getClosestReefStalk() == drivetrain.getClosestReefFace().getLeftStalk(),() ->false);
         L1Score scoreOnFront = new L1Score(drivetrain,intake, () -> drivetrain.isSideFacingReef(), 
-            () -> ReefFace.FRONT_REEF_FACE, () -> new ChassisSpeeds(),() -> drivetrain.getClosestReefStalk() == ReefFace.FRONT_REEF_FACE.getLeftStalk(), false);
+            () -> ReefFace.FRONT_REEF_FACE, () -> new ChassisSpeeds(),() -> drivetrain.getClosestReefStalk() == ReefFace.FRONT_REEF_FACE.getLeftStalk(), () ->false);
             L1Score scoreOnFront2 = new L1Score(drivetrain,intake, () -> drivetrain.isSideFacingReef(), 
-            () -> ReefFace.FRONT_REEF_FACE, () -> new ChassisSpeeds(),() -> drivetrain.getClosestReefStalk() == ReefFace.FRONT_REEF_FACE.getLeftStalk(),false);
+            () -> ReefFace.FRONT_REEF_FACE, () -> new ChassisSpeeds(),() -> drivetrain.getClosestReefStalk() == ReefFace.FRONT_REEF_FACE.getLeftStalk(),() ->false);
         L1Score scoreOnFront3 = new L1Score(drivetrain,intake, () -> drivetrain.isSideFacingReef(), 
-            () -> ReefFace.FRONT_REEF_FACE, () -> new ChassisSpeeds(),() -> drivetrain.getClosestReefStalk() == ReefFace.FRONT_REEF_FACE.getLeftStalk(),false);
+            () -> ReefFace.FRONT_REEF_FACE, () -> new ChassisSpeeds(),() -> drivetrain.getClosestReefStalk() == ReefFace.FRONT_REEF_FACE.getLeftStalk(),() ->false);
 
         return new SequentialCommandGroup(
             pathfindToPose(ReefFace.FRONT_LEFT_REEF_FACE.getPose2d().plus(new Transform2d(1.5,0, new Rotation2d()))).alongWith(intake.defaultCommand(0)).until(
@@ -246,13 +246,13 @@ public class RobotContainer {
         //     leftSideAutoPathfindingPose = ReefFace.FRONT_LEFT_REEF_FACE.getPose2d().plus(new Transform2d(1.5,0, new Rotation2d()));
         // rightSideAutoPathfindingPose = ReefFace.FRONT_RIGHT_REEF_FACE.getPose2d().plus(new Transform2d(1.5,0, new Rotation2d()));
         L1Score scoreOnClosestFace = new L1Score(drivetrain,intake, () -> drivetrain.isSideFacingReef(), 
-            () -> drivetrain.getClosestReefFace(), () -> new ChassisSpeeds(),() -> drivetrain.getClosestReefStalk() == drivetrain.getClosestReefFace().getLeftStalk(),false);
+            () -> drivetrain.getClosestReefFace(), () -> new ChassisSpeeds(),() -> drivetrain.getClosestReefStalk() == drivetrain.getClosestReefFace().getLeftStalk(),() ->false);
         L1Score scoreOnFront = new L1Score(drivetrain,intake, () -> drivetrain.isSideFacingReef(), 
-            () -> ReefFace.FRONT_REEF_FACE, () -> new ChassisSpeeds(),() -> drivetrain.getClosestReefStalk() == ReefFace.FRONT_REEF_FACE.getLeftStalk(),false);
+            () -> ReefFace.FRONT_REEF_FACE, () -> new ChassisSpeeds(),() -> drivetrain.getClosestReefStalk() == ReefFace.FRONT_REEF_FACE.getLeftStalk(),() ->false);
         L1Score scoreOnFront2 = new L1Score(drivetrain,intake, () -> drivetrain.isSideFacingReef(), 
-            () -> ReefFace.FRONT_REEF_FACE, () -> new ChassisSpeeds(),() -> drivetrain.getClosestReefStalk() == ReefFace.FRONT_REEF_FACE.getLeftStalk(),false);
+            () -> ReefFace.FRONT_REEF_FACE, () -> new ChassisSpeeds(),() -> drivetrain.getClosestReefStalk() == ReefFace.FRONT_REEF_FACE.getLeftStalk(),() ->false);
         L1Score scoreOnFront3 = new L1Score(drivetrain,intake, () -> drivetrain.isSideFacingReef(), 
-            () -> ReefFace.FRONT_REEF_FACE, () -> new ChassisSpeeds(),() -> drivetrain.getClosestReefStalk() == ReefFace.FRONT_REEF_FACE.getLeftStalk(),false);
+            () -> ReefFace.FRONT_REEF_FACE, () -> new ChassisSpeeds(),() -> drivetrain.getClosestReefStalk() == ReefFace.FRONT_REEF_FACE.getLeftStalk(),() ->false);
             
         return new SequentialCommandGroup(
             pathfindToPose(ReefFace.FRONT_RIGHT_REEF_FACE.getPose2d().plus(new Transform2d(1.5,0, new Rotation2d()))).alongWith(intake.defaultCommand(0)).until(

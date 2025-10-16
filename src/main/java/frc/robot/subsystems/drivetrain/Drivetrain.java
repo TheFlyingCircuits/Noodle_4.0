@@ -121,10 +121,10 @@ public class Drivetrain extends SubsystemBase {
 
         angleController = new PIDController(6, 0, 0.4); 
         angleController.enableContinuousInput(-180, 180);
-        angleController.setTolerance(1); // degrees, degreesPerSecond.
+        angleController.setTolerance(1.5); // degrees, degreesPerSecond.
 
         translationController = new PIDController(4, 0, 0.15); // kP has units of metersPerSecond per meter of error.
-        translationController.setTolerance(0.04, 1.0); // meters, metersPerSecond
+        translationController.setTolerance(0.03, 0.5); // meters, metersPerSecond
         // TODO: real tolerance used to be .02 but changed to .06 for sim
 
         SmartDashboard.putData("drivetrain/angleController", angleController);
@@ -467,7 +467,9 @@ public class Drivetrain extends SubsystemBase {
         } catch (Exception NoSuchElementException) {
             doesCamExist = false;
         }
+        
         if(doesCamExist) {
+            // System.out.println("right Cam exists");
             if(mt1Exists.get() != null) {
                 mt1 = mt1Exists.get();
                 if(mt1.tagCount == 1 && mt1.rawFiducials.length == 1) {   
@@ -481,16 +483,21 @@ public class Drivetrain extends SubsystemBase {
             if(mt1.tagCount == 0) {
                 doRejectUpdate = true;
             }
-            } 
+            }
+        } else {
+            doRejectUpdate = true;
         }
+
         Optional <LimelightHelpers.PoseEstimate> mt1ExistsLeftLimelight = Optional.ofNullable(LimelightHelpers.getBotPoseEstimate_wpiBlue("limelight-left"));
         boolean doRejectUpdateFromLeftCam = false;
+        // System.out.println(mt1ExistsLeftLimelight.get());
         try {
             mt1ExistsLeftLimelight.get();
         } catch (Exception NoSuchElementException) {
             doesLeftCamExist = false;
         }
         if(doesLeftCamExist) {
+            // System.out.println("left Cam exists");
             if(mt1ExistsLeftLimelight.get() != null) {
                     mt1LeftCam = mt1ExistsLeftLimelight.get();
                     if(mt1LeftCam.tagCount == 1 && mt1LeftCam.rawFiducials.length == 1) {   
@@ -502,10 +509,12 @@ public class Drivetrain extends SubsystemBase {
                         }
                     }
                     if(mt1LeftCam.tagCount == 0) {
-                        doRejectUpdate = true;
+                        doRejectUpdateFromLeftCam = true;
                     }
                     
                 }
+        } else {
+            doRejectUpdateFromLeftCam = true;
         }
 
 
@@ -518,7 +527,7 @@ public class Drivetrain extends SubsystemBase {
                 mt1 = mt1LeftCam;
             }
         }
-        if(!doesCamExist) {
+        if(doRejectUpdate && !doRejectUpdateFromLeftCam) {
             mt1 = mt1LeftCam;
         }
 
@@ -530,7 +539,7 @@ public class Drivetrain extends SubsystemBase {
         // cam is 0.371475 up and 0.1043 forward in meters
 
 
-        if(!doRejectUpdate) {
+        if(!doRejectUpdate || !doRejectUpdateFromLeftCam) {
             double slopeStdDevMeters_PerMeter = 0.003;
             double tagToCamMeters = mt1.avgTagDist;
             if (tagToCamMeters < 1.5) {

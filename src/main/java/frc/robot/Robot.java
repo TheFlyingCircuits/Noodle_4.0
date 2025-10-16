@@ -58,10 +58,7 @@ public class Robot extends LoggedRobot {
 
         m_robotContainer.periodic();
 
-        if (gcTimer.advanceIfElapsed(5)) {
-            System.gc();
-            // System.out.println("gc working");
-        }
+
     }
 
 

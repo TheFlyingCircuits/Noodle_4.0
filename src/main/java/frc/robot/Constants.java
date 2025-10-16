@@ -170,7 +170,7 @@ public final class Constants {
         public final static double kDClimbingLifterVoltsPerDegreePerSec = 0.0;
 
         public final static double aimAtCagePositionDeg = 0.0;
-        public final static double climbingPositionDeg = 130.0;
+        public final static double climbingPositionDeg = 105.0;
         public final static double climberStartingPositionDeg = 90.0;
         // 4:1, 4:1, 7:1, 42:15
         public final static double lifterGearReduction = (1.0 / 4.0) * (1.0 / 4.0) * (1.0 / 7.0) * (15.0 / 42.0);
@@ -220,11 +220,11 @@ public final class Constants {
         public final static double hasCoralPivotSetpointDeg = 95.0;
 
         // Gripper setpoints
-        public final static double frontScoreTopGripperVolts = 2.5;
-        public final static double frontScoreBottomGripperVolts = 2.5;
+        public final static double frontScoreTopGripperVolts = 2.75;
+        public final static double frontScoreBottomGripperVolts = 2.75;
         
-        public final static double backScoreTopGripperVolts = 2.5;
-        public final static double backScoreBottomGripperVolts =2.5;
+        public final static double backScoreTopGripperVolts = 2.75;
+        public final static double backScoreBottomGripperVolts =2.75;
         
         public final static double holdCoralGripperVolts = 0.0;
         public final static double intakingTopGripperVolts = -8.0;

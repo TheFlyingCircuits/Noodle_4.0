@@ -35,7 +35,7 @@ public class ClimberIONeo implements ClimberIO{
         // lifter moter config
         configLifter = new SparkMaxConfig();
         configLifter.idleMode(IdleMode.kBrake)
-            .smartCurrentLimit(50)
+            .smartCurrentLimit(35)
             .inverted(true);
         // configLifter.softLimit.forwardSoftLimitEnabled(false);
 

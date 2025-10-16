@@ -197,7 +197,7 @@ public class Intake extends SubsystemBase {
             if(isInIntakeFunction) {
                 desiredPivotAngleDegrees = IntakeConstants.hasCoralPivotSetpointDeg;
                 desiredBottomGripperVolts = 0;
-                desiredTopGripperVolts = IntakeConstants.intakingTopGripperVolts;
+                desiredTopGripperVolts = -11;
                 return;
             }
             desiredPivotAngleDegrees = IntakeConstants.hasCoralPivotSetpointDeg;
@@ -239,7 +239,7 @@ public class Intake extends SubsystemBase {
     }
 
     public void intakeClimbPos(){
-        desiredPivotAngleDegrees = 0;
+        desiredPivotAngleDegrees = 172;
     }
 
 
