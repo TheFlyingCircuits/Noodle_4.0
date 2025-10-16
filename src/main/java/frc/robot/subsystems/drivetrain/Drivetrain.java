@@ -71,6 +71,8 @@ public class Drivetrain extends SubsystemBase {
     // in meters/sec
     private ProfiledPIDController profiledController;
 
+    private TrapezoidProfile motionProfile;
+
     /** used to rotate about the intake instead of the center of the robot */
     private Transform2d centerOfRotation_robotFrame = new Transform2d();
     
@@ -131,6 +133,9 @@ public class Drivetrain extends SubsystemBase {
         profiledController = new ProfiledPIDController(2.8, 0, 0.125, new TrapezoidProfile.Constraints(
             4, 3));
         profiledController.setTolerance(0.01, 0.01);
+        
+        motionProfile = new TrapezoidProfile(new TrapezoidProfile.Constraints(
+            4, 3));
 
         configPathPlanner();
     }
@@ -333,24 +338,30 @@ public class Drivetrain extends SubsystemBase {
 
         Logger.recordOutput("drivetrain/pidErrorMeters", error);
         
-        double profiledOutputMetersPerSecond = -profiledController.calculate(error.getNorm(), 0)
-         - profiledController.getSetpoint().velocity;
+        double profiledOutputMetersPerSecond = -motionProfile.calculate(0.02, new TrapezoidProfile.State(error.getNorm(), getFieldOrientedVelocity().vxMetersPerSecond + getFieldOrientedVelocity().vyMetersPerSecond),
+            new TrapezoidProfile.State(0.0, 0.0)).velocity;
 
 
         // copy and pasted tollerance from pid to pose
 
+        double translationPIDoutput = -translationController.calculate(error.getNorm(), 0);
+
         if (translationController.atSetpoint()) {
             profiledOutputMetersPerSecond = 0;
+            translationPIDoutput = 0;
         }
 
 
         double xMetersPerSecond = profiledOutputMetersPerSecond*error.getAngle().getCos();
         double yMetersPerSecond = profiledOutputMetersPerSecond*error.getAngle().getSin();
+
+        double xPIDMetersPerSecond = translationPIDoutput*error.getAngle().getCos();
+        double yPIDMetersPerSecond = translationPIDoutput*error.getAngle().getSin();
         
         fieldOrientedDriveWhileAiming(
             new ChassisSpeeds(
-                xMetersPerSecond,
-                yMetersPerSecond,
+                xMetersPerSecond + xPIDMetersPerSecond,
+                yMetersPerSecond + yPIDMetersPerSecond,
                 0
             ),
             desired.getRotation()

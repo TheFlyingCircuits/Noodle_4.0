@@ -7,8 +7,9 @@ import org.littletonrobotics.junction.Logger;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.DrivetrainConstants;
@@ -27,14 +28,14 @@ public class L1Score extends Command {
     private boolean isGoingForLeft;
     
 
-    public L1Score(Drivetrain drivetrain, Intake intake, Supplier<Boolean> ifFacingReef, Supplier<ReefFace> faceScoringOn, Supplier<ChassisSpeeds> driverRequestedVel) {
+    public L1Score(Drivetrain drivetrain, Intake intake, Supplier<Boolean> ifFacingReef, Supplier<ReefFace> faceScoringOn, Supplier<ChassisSpeeds> driverRequestedVel, Supplier<Boolean> isClosestStalkLeft) {
         this.drivetrain=drivetrain;
         this.intake=intake;
         this.ifFacingReef=ifFacingReef;
         this.faceScoringOn=faceScoringOn;
         this.driverRequestedVel=driverRequestedVel;
         scoringTimer = new Timer();
-        isGoingForLeft = drivetrain.getClosestReefStalk() == faceScoringOn.get().getLeftStalk();
+        isGoingForLeft = isClosestStalkLeft.get();
         addRequirements(drivetrain, intake);
     }
 
@@ -49,15 +50,19 @@ public class L1Score extends Command {
 
         double adjustedY;
         boolean noChangeInY = overideY.vyMetersPerSecond == 0;
-        boolean isYPositive = overideY.vyMetersPerSecond >= 0;
+        boolean isYPositive = !(overideY.vyMetersPerSecond >= 0);// inverse bc needs to be flipped around for left on joystick to move to the left setpoint
 
         if (face == ReefFace.BACK_REEF_FACE || face == ReefFace.BACK_LEFT_REEF_FACE || face == ReefFace.BACK_RIGHT_REEF_FACE) {
             isYPositive = !isYPositive;
         }
+        if (DriverStation.getAlliance().get() == Alliance.Red) {
+            isYPositive = !isYPositive;
+        }
+
 
         Pose2d targetPose = face.getPose2d();
 
-        Translation2d vectorRobotToReef = targetPose.getTranslation().minus(drivetrain.getPoseMeters().getTranslation());
+        // Translation2d vectorRobotToReef = targetPose.getTranslation().minus(drivetrain.getPoseMeters().getTranslation());
 
         // double adjustedY = face.getPose2d().getRotation().minus(
         //     vectorRobotToReef.getAngle().plus(Rotation2d.k180deg)).getDegrees();
@@ -88,15 +93,11 @@ public class L1Score extends Command {
             isGoingForLeft = isYPositive;
         }
 
-
-        adjustedY = isGoingForLeft? 0.075 : -0.425;
-
-        adjustedY = !isFacingForward && isGoingForLeft? 0.225 : -0.275;
-
-
-
-
-
+        if(isFacingForward) {
+            adjustedY = isGoingForLeft? 0.075 : -0.425;
+        } else{
+            adjustedY = isGoingForLeft? 0.225 : -0.275;
+        }
         
         Rotation2d rotationAdjustment;
         if (isFacingForward) {
@@ -130,16 +131,19 @@ public class L1Score extends Command {
         Pose2d adjustedPose = adjustedReefScoringPose(faceScoringOn.get(), ifFacingReef.get(), driverRequestedVel.get());
         Logger.recordOutput("L1Scoring/targetDrivePose", adjustedPose);
 
-        boolean closeToReef = adjustedPose.minus(drivetrain.getPoseMeters()).getTranslation().getNorm() < 1;
+        boolean closeToScoringPose = adjustedPose.minus(drivetrain.getPoseMeters()).getTranslation().getNorm() < 1;
+
+        boolean basicallyAtScoringSetpoint = adjustedPose.minus(drivetrain.getPoseMeters()).getTranslation().getNorm() < 0.04;
         
-        if (!closeToReef) {
+        if (!closeToScoringPose) {
             drivetrain.profileToPose(adjustedPose);
         } else {
             drivetrain.pidToPose(adjustedPose, 1);
         }
         // drivetrain.pidToPose(adjustedPose, 2.0);
 
-        boolean readyToScore = drivetrain.translationControllerAtSetpoint() && drivetrain.isAngleAligned();
+        boolean readyToScore = basicallyAtScoringSetpoint && drivetrain.isAngleAligned();
+        System.out.println(readyToScore);
         intake.score(ifFacingReef, readyToScore);
         
         if(readyToScore && timerHasNotStarted) {
