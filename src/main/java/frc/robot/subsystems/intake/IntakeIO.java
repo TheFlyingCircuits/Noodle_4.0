@@ -11,6 +11,7 @@ public interface IntakeIO {
         public double pivotAngleRadians = Units.degreesToRadians(-19.0);
         public double pivotVelocityDegreesPerSecond = 0.0;
         public double pivotAppliedVolts = 0.0;
+        public double pivotFollowerAppliedVolts = 0.0;;
         public double pivotAmps = 0.0;
         public double desiredPivotAngleDeg = -19.0;
 

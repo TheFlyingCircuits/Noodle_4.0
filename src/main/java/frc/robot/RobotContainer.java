@@ -130,6 +130,10 @@ public class RobotContainer {
         duncanController.rightTrigger().whileTrue(intake.intakeCommand());
 
         duncanController.b().whileTrue(Commands.run(() ->manualScoringOveride = true)).whileFalse(Commands.run(() ->manualScoringOveride = false));
+        
+        duncanController.start().whileTrue(intake.homeIntakeCommand(-19));
+
+        duncanController.leftTrigger().whileTrue(Commands.run (() -> drivetrain.pidToPose(ReefFace.BACK_REEF_FACE.getPose2d().plus(new Transform2d(0.1,0,Rotation2d.k180deg)),2)));
 
         duncanController.leftBumper().whileTrue(intake.ejectCoralCommand());
 
@@ -161,16 +165,16 @@ public class RobotContainer {
         // duncanController.povDown().whileTrue(Commands.run(() -> intake.setGripperVolts(-2, -2)));
 
     
-        duncanController.povRight().whileTrue(new InstantCommand(() -> climber.setClimbBoolean(false))
+        duncanController.povUp().whileTrue(new InstantCommand(() -> climber.setClimbBoolean(false))
             .alongWith(new InstantCommand(() -> climber.setManualClimbBoolean(false))))
         .onFalse(
             climber.climbCommand()
             .alongWith(intake.intakeClimbCommand())
         );
 
-        duncanController.povLeft().whileTrue(Commands.run(() -> climber.setManualClimbBoolean(true)));
+        duncanController.povDown().whileTrue(Commands.run(() -> climber.setManualClimbBoolean(true)));
         
-        duncanController.povUp().whileTrue(climber.setLifterVoltsCommand(-3)).onFalse(climber.homeClimberCommand(90));
+        // duncanController.povUp().whileTrue(climber.setLifterVoltsCommand(-3)).onFalse(climber.homeClimberCommand(90));
     }
     public void setDefaultCommands() {
         drivetrain.setDefaultCommand(driverFullyControlDrivetrain().withName("driveDefualtCommand"));
@@ -230,13 +234,13 @@ public class RobotContainer {
 
             scoreOnClosestFace.until((scoreOnClosestFace::hasProblablyScored)),
 
-            pickUpLolipop(1,150.0,-0.25).until(() -> intake.doesHaveACoral()).withTimeout(1.5),
+            pickUpLolipop(1,150.0,-0.25).until(() -> intake.doesHaveACoral()).withTimeout(4),
             scoreOnFront.until((scoreOnFront::hasProblablyScored)),
 
-            pickUpLolipop(2,200.0,0.25).until(() -> intake.doesHaveACoral()).withTimeout(1.5),
+            pickUpLolipop(2,200.0,0.25).until(() -> intake.doesHaveACoral()).withTimeout(4),
             scoreOnFront2.until((scoreOnFront2::hasProblablyScored)),
             
-            pickUpLolipop(3,200.0,0.25).until(() -> intake.doesHaveACoral()).withTimeout(1.5),
+            pickUpLolipop(3,200.0,0.25).until(() -> intake.doesHaveACoral()).withTimeout(4),
             scoreOnFront3.until((scoreOnFront3::hasProblablyScored))
         );
     }
@@ -259,13 +263,13 @@ public class RobotContainer {
                 () -> Math.abs(ReefFace.FRONT_RIGHT_REEF_FACE.getPose2d().plus(new Transform2d(1.5,0, new Rotation2d())).minus(drivetrain.getPoseMeters()).getTranslation().getNorm()) < 0.5),
             scoreOnClosestFace.until((scoreOnClosestFace::hasProblablyScored)),
 
-            pickUpLolipop(3,200.0,0.25).until(() -> intake.doesHaveACoral()).withTimeout(1.5),
+            pickUpLolipop(3,200.0,0.25).until(() -> intake.doesHaveACoral()).withTimeout(4),
             scoreOnFront.until((scoreOnFront::hasProblablyScored)),
 
-            pickUpLolipop(2,150.0,-0.25).until(() -> intake.doesHaveACoral()).withTimeout(1.5),
+            pickUpLolipop(2,150.0,-0.25).until(() -> intake.doesHaveACoral()).withTimeout(4),
             scoreOnFront2.until((scoreOnFront2::hasProblablyScored)),
             
-            pickUpLolipop(1,150.0,-0.25).until(() -> intake.doesHaveACoral()).withTimeout(1.5),
+            pickUpLolipop(1,150.0,-0.25).until(() -> intake.doesHaveACoral()).withTimeout(4),
             scoreOnFront3.until((scoreOnFront3::hasProblablyScored))
         );
     }
@@ -300,10 +304,10 @@ public class RobotContainer {
         Logger.recordOutput("first loipop pose", firstPositionToGoTo);
 
         return new SequentialCommandGroup(
-            Commands.run(() -> drivetrain.pidToPose(firstPositionToGoTo, 4))
+            Commands.run(() -> drivetrain.pidToPose(firstPositionToGoTo, 2))
                 .alongWith(intake.intakeCommand()).until(() -> intake.isIntakeDown() && drivetrain.translationControllerAtSetpoint()),
             intake.intakeCommand().alongWith(Commands.run(() -> drivetrain.pidToPose(
-                secondPositionToGoTo , 4))).until(() -> intake.doesHaveACoral())
+                secondPositionToGoTo , 2))).until(() -> intake.doesHaveACoral())
         );
     }
 

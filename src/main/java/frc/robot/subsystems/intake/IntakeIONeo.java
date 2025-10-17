@@ -74,6 +74,7 @@ public class IntakeIONeo implements IntakeIO {
         SmartDashboard.putNumber("TEST arm postion", pivotNeo.getEncoder().getPosition() * 360.0*IntakeConstants.pivotGearReduction);
 
         inputs.pivotAngleRadians = Units.degreesToRadians(pivotNeo.getEncoder().getPosition());
+        inputs.pivotFollowerAppliedVolts = pivotNeoFollow.getAppliedOutput()*pivotNeo.getBusVoltage();
         inputs.pivotVelocityDegreesPerSecond = pivotNeo.getVelocity();
         inputs.pivotAppliedVolts = pivotNeo.getAppliedOutput()*pivotNeo.getBusVoltage();
         inputs.pivotAmps = pivotNeo.getOutputCurrent();
@@ -110,10 +111,6 @@ public class IntakeIONeo implements IntakeIO {
         pivotNeo.setVoltage(volts);
     }
 
-    @Override
-    public void setPivotPosition(double positionDegrees) {
-        pivotNeo.setPosition(positionDegrees);
-    }
 
     @Override
     public void setTopGripperVolts(double volts) {
@@ -123,5 +120,10 @@ public class IntakeIONeo implements IntakeIO {
     @Override
     public void setBottomGripperVolts(double volts) {
         bottomGripperNeo.setVoltage(volts);
+    }
+
+    @Override
+    public void setPivotPosition(double positionDeg){
+        pivotNeo.getEncoder().setPosition(positionDeg);
     }
 }

@@ -46,9 +46,9 @@ public class L1Score extends Command {
         // double adjustedX = FieldConstants.stalkInsetMeters;        // puts center of robot at the outer edge of the reef
         double adjustedX = DrivetrainConstants.bumperWidthMeters / 2.0;  // move back a half bumper length so the bumper is touching the edge of the reef
         if(isFacingForward){
-            adjustedX += 0.2; // measure this manually
+            adjustedX += 0.125; // measure this manually
         } else {
-            adjustedX += -0.075;
+            adjustedX += -0.06;
         }
 
         double adjustedY;
@@ -96,10 +96,11 @@ public class L1Score extends Command {
             isGoingForLeft = isYPositive;
         }
 
+        double centerToIntakeMeters = 0.12065;
         if(isFacingForward) { // .25 each way +- .125
-            adjustedY = isGoingForLeft? 0.125 : -0.375;
+            adjustedY = isGoingForLeft? 0.25 - centerToIntakeMeters : -0.25 - centerToIntakeMeters;
         } else{
-            adjustedY = isGoingForLeft? 0.375 : -0.125;
+            adjustedY = isGoingForLeft? 0.25 + centerToIntakeMeters : -0.25 + centerToIntakeMeters;
         }
         
         Rotation2d rotationAdjustment;
@@ -125,27 +126,30 @@ public class L1Score extends Command {
 
     public boolean hasProblablyScored() {
         // System.out.println(scoringTimer.get() > 0.5);
-        return scoringTimer.get() > 0.5;
+        return scoringTimer.get() > 1.5;
     }
 
     @Override
     public void execute() {
+        drivetrain.fullyTrustVisionNextPoseUpdate();
         // System.out.println(faceScoringOn.get().getName());
         Pose2d adjustedPose = adjustedReefScoringPose(faceScoringOn.get(), ifFacingReef.get(), driverRequestedVel.get());
         Logger.recordOutput("L1Scoring/targetDrivePose", adjustedPose);
 
         boolean closeToScoringPose = adjustedPose.minus(drivetrain.getPoseMeters()).getTranslation().getNorm() < 1;
 
-        boolean basicallyAtScoringSetpoint = adjustedPose.minus(drivetrain.getPoseMeters()).getTranslation().getNorm() < 0.04;
+        boolean basicallyAtScoringSetpoint = adjustedPose.minus(drivetrain.getPoseMeters()).getTranslation().getNorm() < 0.06;
         
         if (!closeToScoringPose) {
-            drivetrain.profileToPose(adjustedPose);
+            // drivetrain.profileToPose(adjustedPose);
+            drivetrain.pidToPose(adjustedPose, 2.5);
         } else {
-            drivetrain.pidToPose(adjustedPose, 1);
+            drivetrain.pidToPose(adjustedPose, 1.5);
         }
+        // drivetrain.profileToPose(adjustedPose);
         // drivetrain.pidToPose(adjustedPose, 2.0);
 
-        boolean readyToScore = drivetrain.translationControllerAtSetpoint() && drivetrain.isAngleAligned();
+        boolean readyToScore = (drivetrain.translationControllerAtSetpoint() || basicallyAtScoringSetpoint) && drivetrain.isAngleAligned();
         Logger.recordOutput("L1Scoring/readyToScore", readyToScore);
         Logger.recordOutput("L1Scoring/isAngleAligned", drivetrain.isAngleAligned());
         Logger.recordOutput("L1Scoring/translationControllerAtSetpoint", drivetrain.translationControllerAtSetpoint());
@@ -156,18 +160,18 @@ public class L1Score extends Command {
             Logger.recordOutput("L1Scoring/manualOveride", false);
         }
         // System.out.println(readyToScore);
-        intake.score(ifFacingReef, readyToScore);
+        intake.score(ifFacingReef, readyToScore, manualScoreOveride.get());
         
         if(readyToScore && timerHasNotStarted) {
             scoringTimer.start();
             timerHasNotStarted = false;
         }
 
-        if(!readyToScore) {
-            scoringTimer.stop();
-            scoringTimer.reset();
-            timerHasNotStarted = true;
-        }
+        // if(!readyToScore) {
+        //     scoringTimer.stop();
+        //     scoringTimer.reset();
+        //     timerHasNotStarted = true;
+        // }
 
         
     }

@@ -119,12 +119,12 @@ public class Drivetrain extends SubsystemBase {
             new Pose2d());
 
 
-        angleController = new PIDController(6, 0, 0.4); 
+        angleController = new PIDController(4.5, 0, 0.0); 
         angleController.enableContinuousInput(-180, 180);
         angleController.setTolerance(1.5); // degrees, degreesPerSecond.
 
-        translationController = new PIDController(4, 0, 0.15); // kP has units of metersPerSecond per meter of error.
-        translationController.setTolerance(0.03, 0.5); // meters, metersPerSecond
+        translationController = new PIDController(3.75, 0, 0.0); // kP has units of metersPerSecond per meter of error.
+        translationController.setTolerance(0.03); // meters, metersPerSecond
         // TODO: real tolerance used to be .02 but changed to .06 for sim
 
         SmartDashboard.putData("drivetrain/angleController", angleController);
@@ -349,6 +349,7 @@ public class Drivetrain extends SubsystemBase {
         if (translationController.atSetpoint()) {
             profiledOutputMetersPerSecond = 0;
             translationPIDoutput = 0;
+            // System.out.println("AT SETPOINT IN PROFILE TO POSE!!!!!!!!!!");
         }
 
 

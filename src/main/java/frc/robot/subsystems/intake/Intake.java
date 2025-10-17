@@ -41,7 +41,7 @@ public class Intake extends SubsystemBase {
 
     double pChange = 0.5;
 
-    boolean shouldSetNoVolts = false;
+    boolean shouldntAutoGoToPos = false;
 
     boolean currentlyIntaking = false;
 
@@ -77,7 +77,9 @@ public class Intake extends SubsystemBase {
 
         Logger.processInputs("intakeInputs", inputs);
 
-        goToDesiredPivotAngle(currentlyIntaking);
+        if(!shouldntAutoGoToPos){
+            goToDesiredPivotAngle(currentlyIntaking);
+        }
         setGripperVolts(inputs.desiredTopGripperVolts, inputs.desiredBottomGripperVolts);
     }
 
@@ -167,14 +169,14 @@ public class Intake extends SubsystemBase {
         setPivotVolts(outputVoltsCombined);
     }
 
-    public void score(Supplier<Boolean> facingReef, boolean readyToScore) {
+    public void score(Supplier<Boolean> facingReef, boolean readyToScore, boolean manualOveride) {
         // this function needs to be called in a loop like execute or periodic
         double scoringPivotDegrees = (facingReef.get()) ? IntakeConstants.frontScorePivotSetpointDeg : IntakeConstants.backScorePivotSetpointDeg; 
         double topGripperScoringVolts = (facingReef.get()) ? IntakeConstants.frontScoreTopGripperVolts : IntakeConstants.backScoreTopGripperVolts;
         double bottomGripperScoringVolts = (facingReef.get()) ? IntakeConstants.frontScoreBottomGripperVolts : IntakeConstants.backScoreBottomGripperVolts;
         
         desiredPivotAngleDegrees = scoringPivotDegrees;
-        if(Math.abs(inputs.pivotAngleDegrees - scoringPivotDegrees) < 1 && readyToScore) { // checks if the pivot is within 1 deg of target
+        if((Math.abs(inputs.pivotAngleDegrees - scoringPivotDegrees) < 2.5 && readyToScore) || manualOveride) { // checks if the pivot is within 1 deg of target
             desiredTopGripperVolts = topGripperScoringVolts;
             desiredBottomGripperVolts = bottomGripperScoringVolts;
             hasACoral = false; // we assume that we wont have a coral after we start to score
@@ -185,13 +187,20 @@ public class Intake extends SubsystemBase {
 
     }
 
+    public void homeIntake(double positionDeg){
+        // sets the Actuall position for homing
+        shouldntAutoGoToPos = true;
+        io.setPivotVolts(-3);
+        io.setPivotPosition(positionDeg);
+    }
+
     public void defaultFunction(double newPValue, boolean isInIntakeFunction) {
         // TODO: find real amp values for when we have and don't have a coral
         // if(hasACoral && (inputs.aveBottomGripperAmps < 10.0 && inputs.aveTopGripperAmps < 10.0)) { // if we have low amps while trying to grip we prob dont have coral
         //     hasACoral = false; // this is for if we drop the coral while doing defualt command the code adjusts by itself
         // }
         currentlyIntaking = false;
-        shouldSetNoVolts = false;
+        shouldntAutoGoToPos = false;
         io.setCoastMode(false);
         if (hasACoral) {
             if(isInIntakeFunction) {
@@ -229,7 +238,7 @@ public class Intake extends SubsystemBase {
             desiredBottomGripperVolts = IntakeConstants.intakingBottomGripperVolts;
             hasACoral = false;
             if (Math.abs(desiredPivotAngleDegrees - inputs.pivotAngleDegrees) < 3) {
-                shouldSetNoVolts = true;
+                shouldntAutoGoToPos = true;
             }
     }
 
@@ -263,8 +272,8 @@ public class Intake extends SubsystemBase {
         return this.run(() -> intakeCoral());
     }
 
-    public Command intakeScoreCommand(Supplier<Boolean> isFacingReef, boolean readyToScore) {
-        return this.run(() -> score(isFacingReef, readyToScore));
+    public Command intakeScoreCommand(Supplier<Boolean> isFacingReef, boolean readyToScore, boolean manualOveride) {
+        return this.run(() -> score(isFacingReef, readyToScore, manualOveride));
     }
 
     public Command ejectCoralCommand() {
@@ -273,5 +282,9 @@ public class Intake extends SubsystemBase {
 
     public Command intakeClimbCommand() {
         return this.run(() -> intakeClimbPos());
+    }
+
+    public Command homeIntakeCommand(double posDeg) {
+        return this.run(() -> homeIntake(posDeg));
     }
 }
