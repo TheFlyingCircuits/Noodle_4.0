@@ -126,7 +126,7 @@ public class L1Score extends Command {
 
     public boolean hasProblablyScored() {
         // System.out.println(scoringTimer.get() > 0.5);
-        return scoringTimer.get() > 1.5;
+        return scoringTimer.get() > 0.75;
     }
 
     @Override
@@ -149,7 +149,7 @@ public class L1Score extends Command {
         // drivetrain.profileToPose(adjustedPose);
         // drivetrain.pidToPose(adjustedPose, 2.0);
 
-        boolean readyToScore = (drivetrain.translationControllerAtSetpoint() || basicallyAtScoringSetpoint) && drivetrain.isAngleAligned();
+        boolean readyToScore = (drivetrain.translationControllerAtSetpoint() || (DriverStation.isAutonomous() && basicallyAtScoringSetpoint)) && drivetrain.isAngleAligned();
         Logger.recordOutput("L1Scoring/readyToScore", readyToScore);
         Logger.recordOutput("L1Scoring/isAngleAligned", drivetrain.isAngleAligned());
         Logger.recordOutput("L1Scoring/translationControllerAtSetpoint", drivetrain.translationControllerAtSetpoint());
