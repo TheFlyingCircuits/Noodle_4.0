@@ -116,7 +116,8 @@ public class Intake extends SubsystemBase {
     }
 
     public boolean isIntakeDown() {
-        return Math.abs(inputs.pivotAngleDegrees - IntakeConstants.intakePivotSetpointDeg) < 1.5;
+        return Math.abs(IntakeConstants.intakePivotSetpointDeg - inputs.pivotAngleDegrees) < 10.0;
+        // return true;
     }
 
     public boolean doesHaveACoral() {
@@ -171,6 +172,7 @@ public class Intake extends SubsystemBase {
 
     public void score(Supplier<Boolean> facingReef, boolean readyToScore, boolean manualOveride) {
         // this function needs to be called in a loop like execute or periodic
+        System.out.println("ijegiojweogijwoigjwiogej");
         double scoringPivotDegrees = (facingReef.get()) ? IntakeConstants.frontScorePivotSetpointDeg : IntakeConstants.backScorePivotSetpointDeg; 
         double topGripperScoringVolts = (facingReef.get()) ? IntakeConstants.frontScoreTopGripperVolts : IntakeConstants.backScoreTopGripperVolts;
         double bottomGripperScoringVolts = (facingReef.get()) ? IntakeConstants.frontScoreBottomGripperVolts : IntakeConstants.backScoreBottomGripperVolts;
@@ -194,7 +196,7 @@ public class Intake extends SubsystemBase {
         io.setPivotPosition(positionDeg);
     }
 
-    public void defaultFunction(double newPValue, boolean isInIntakeFunction) {
+    public void defaultFunction(boolean isInIntakeFunction) {
         // TODO: find real amp values for when we have and don't have a coral
         // if(hasACoral && (inputs.aveBottomGripperAmps < 10.0 && inputs.aveTopGripperAmps < 10.0)) { // if we have low amps while trying to grip we prob dont have coral
         //     hasACoral = false; // this is for if we drop the coral while doing defualt command the code adjusts by itself
@@ -216,7 +218,6 @@ public class Intake extends SubsystemBase {
             return;
         } else {
             desiredPivotAngleDegrees = IntakeConstants.noCoralPivotSetpointDeg;
-            pChange = newPValue;
             desiredTopGripperVolts = 0.0;
             desiredBottomGripperVolts = 0.0;
         }
@@ -229,7 +230,7 @@ public class Intake extends SubsystemBase {
         io.setCoastMode(true);
         if (inputs.aveBottomGripperAmps > 40.0 || inputs.aveTopGripperAmps > 40.0) {
             hasACoral = true;
-            defaultFunction(pChange, true);
+            defaultFunction(true);
             return;
         }
 
@@ -237,9 +238,9 @@ public class Intake extends SubsystemBase {
             desiredTopGripperVolts = IntakeConstants.intakingTopGripperVolts;
             desiredBottomGripperVolts = IntakeConstants.intakingBottomGripperVolts;
             hasACoral = false;
-            if (Math.abs(desiredPivotAngleDegrees - inputs.pivotAngleDegrees) < 3) {
-                shouldntAutoGoToPos = true;
-            }
+            // if (Math.abs(desiredPivotAngleDegrees - inputs.pivotAngleDegrees) < 3) {
+            //     shouldntAutoGoToPos = true;
+            // }
     }
 
     public void ejectCoral() {
@@ -264,8 +265,8 @@ public class Intake extends SubsystemBase {
         return this.run(() -> setGripperVolts(topGripperVolts, bottomGripperVolts));
     }
 
-    public Command defaultCommand(double newPValue) {
-        return this.run(() -> defaultFunction(newPValue, false));
+    public Command defaultCommand() {
+        return this.run(() -> defaultFunction(false));
     }
 
     public Command intakeCommand() {

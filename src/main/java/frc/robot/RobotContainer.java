@@ -5,6 +5,7 @@
 package frc.robot;
 
 import java.util.function.BooleanSupplier;
+import java.util.function.Supplier;
 
 import org.littletonrobotics.junction.Logger;
 
@@ -19,7 +20,6 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.RobotBase;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.SimpleWidget;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -107,8 +107,7 @@ public class RobotContainer {
         // pValueChange= Shuffleboard.getTab("robotContainer")
         // .add("pivot pivotDesiredDeg", 0.0);
 
-        pivotKpRad = Shuffleboard.getTab("robotContainer")
-        .add("pivot KP", 0.5);
+
 
         setDefaultCommands();
 
@@ -133,7 +132,7 @@ public class RobotContainer {
         
         duncanController.start().whileTrue(intake.homeIntakeCommand(-19));
 
-        duncanController.leftTrigger().whileTrue(Commands.run (() -> drivetrain.pidToPose(ReefFace.BACK_REEF_FACE.getPose2d().plus(new Transform2d(0.1,0,Rotation2d.k180deg)),2)));
+        // duncanController.leftTrigger().whileTrue(Commands.run (() -> drivetrain.pidToPose(ReefFace.BACK_REEF_FACE.getPose2d().plus(new Transform2d(0.1,0,Rotation2d.k180deg)),2)));
 
         duncanController.leftBumper().whileTrue(intake.ejectCoralCommand());
 
@@ -179,7 +178,7 @@ public class RobotContainer {
     public void setDefaultCommands() {
         drivetrain.setDefaultCommand(driverFullyControlDrivetrain().withName("driveDefualtCommand"));
         // leds.setDefaultCommand(leds.heartbeatCommand(1.).ignoringDisable(true).withName("ledsDefaultCommand"));
-        intake.setDefaultCommand(intake.defaultCommand(pivotKpRad.getEntry().get().getDouble()));
+        intake.setDefaultCommand(intake.defaultCommand());
         climber.setDefaultCommand(climber.defualtCommand());
     }
 
@@ -202,9 +201,9 @@ public class RobotContainer {
         }).withName("driverFullyControlDrivetrain");
     }
 
-    private Command lineUpWithClosestFace() {
-        return Commands.run (() -> drivetrain.pidToPose(drivetrain.getClosestReefFace().getPose2d().plus(new Transform2d(0.5,0,Rotation2d.k180deg)),2));
-    }
+    // private Command lineUpWithClosestFace() {
+    //     return Commands.run (() -> drivetrain.pidToPose(drivetrain.getClosestReefFace().getPose2d().plus(new Transform2d(0.5,0,Rotation2d.k180deg)),2));
+    // }
 
     /** AUTOS!!!!!!!!!! */
 
@@ -229,19 +228,23 @@ public class RobotContainer {
             () -> ReefFace.FRONT_REEF_FACE, () -> new ChassisSpeeds(),() -> drivetrain.getClosestReefStalk() == ReefFace.FRONT_REEF_FACE.getLeftStalk(),() ->false);
 
         return new SequentialCommandGroup(
-            pathfindToPose(ReefFace.FRONT_LEFT_REEF_FACE.getPose2d().plus(new Transform2d(1.5,0, new Rotation2d()))).alongWith(intake.defaultCommand(0)).until(
-                () -> Math.abs(ReefFace.FRONT_LEFT_REEF_FACE.getPose2d().plus(new Transform2d(1.5,0, new Rotation2d())).minus(drivetrain.getPoseMeters()).getTranslation().getNorm()) < 0.5),
+            pathfindToPose(ReefFace.FRONT_LEFT_REEF_FACE.getPose2d().plus(new Transform2d(1.5,0, new Rotation2d().minus(Rotation2d.kCW_90deg)))).alongWith(intake.defaultCommand()).until(
+                () -> Math.abs(ReefFace.FRONT_LEFT_REEF_FACE.getPose2d().plus(new Transform2d(1.5,0, new Rotation2d().minus(Rotation2d.kCW_90deg))).minus(drivetrain.getPoseMeters()).getTranslation().getNorm()) < 0.5),
 
-            scoreOnClosestFace.until((scoreOnClosestFace::hasProblablyScored)),
+            l1ScoreInAuto(drivetrain,intake, () -> false, 
+            () -> ReefFace.FRONT_LEFT_REEF_FACE, () -> new ChassisSpeeds(),() -> drivetrain.getClosestReefStalk() == drivetrain.getClosestReefFace().getLeftStalk(),() ->false),
 
-            pickUpLolipop(1,150.0,-0.25).until(() -> intake.doesHaveACoral()).withTimeout(4),
-            scoreOnFront.until((scoreOnFront::hasProblablyScored)),
+            pickUpLolipop(1,270.0-50.0,-0.3).until(() -> intake.doesHaveACoral()).withTimeout(4),
+            l1ScoreInAuto(drivetrain,intake, () -> false, 
+            () -> ReefFace.FRONT_REEF_FACE, () -> new ChassisSpeeds(),() -> drivetrain.getClosestReefStalk() == ReefFace.FRONT_REEF_FACE.getLeftStalk(),() ->false),
 
-            pickUpLolipop(2,200.0,0.25).until(() -> intake.doesHaveACoral()).withTimeout(4),
-            scoreOnFront2.until((scoreOnFront2::hasProblablyScored)),
+            pickUpLolipop(2,270.0+50.0,0.3).until(() -> intake.doesHaveACoral()).withTimeout(4),
+            l1ScoreInAuto(drivetrain,intake, () -> false, 
+            () -> ReefFace.FRONT_REEF_FACE, () -> new ChassisSpeeds(),() -> drivetrain.getClosestReefStalk() == ReefFace.FRONT_REEF_FACE.getLeftStalk(),() ->false),
             
-            pickUpLolipop(3,200.0,0.25).until(() -> intake.doesHaveACoral()).withTimeout(4),
-            scoreOnFront3.until((scoreOnFront3::hasProblablyScored))
+            pickUpLolipop(3,270.0+50.0,0.3).until(() -> intake.doesHaveACoral()).withTimeout(4),
+            l1ScoreInAuto(drivetrain,intake, () -> drivetrain.isSideFacingReef(), 
+            () -> ReefFace.FRONT_REEF_FACE, () -> new ChassisSpeeds(),() -> drivetrain.getClosestReefStalk() == ReefFace.FRONT_REEF_FACE.getLeftStalk(),() ->false)
         );
     }
 
@@ -250,7 +253,7 @@ public class RobotContainer {
         //     leftSideAutoPathfindingPose = ReefFace.FRONT_LEFT_REEF_FACE.getPose2d().plus(new Transform2d(1.5,0, new Rotation2d()));
         // rightSideAutoPathfindingPose = ReefFace.FRONT_RIGHT_REEF_FACE.getPose2d().plus(new Transform2d(1.5,0, new Rotation2d()));
         L1Score scoreOnClosestFace = new L1Score(drivetrain,intake, () -> drivetrain.isSideFacingReef(), 
-            () -> drivetrain.getClosestReefFace(), () -> new ChassisSpeeds(),() -> drivetrain.getClosestReefStalk() == drivetrain.getClosestReefFace().getLeftStalk(),() ->false);
+            () -> ReefFace.FRONT_RIGHT_REEF_FACE, () -> new ChassisSpeeds(),() -> drivetrain.getClosestReefStalk() == drivetrain.getClosestReefFace().getLeftStalk(),() ->false);
         L1Score scoreOnFront = new L1Score(drivetrain,intake, () -> drivetrain.isSideFacingReef(), 
             () -> ReefFace.FRONT_REEF_FACE, () -> new ChassisSpeeds(),() -> drivetrain.getClosestReefStalk() == ReefFace.FRONT_REEF_FACE.getLeftStalk(),() ->false);
         L1Score scoreOnFront2 = new L1Score(drivetrain,intake, () -> drivetrain.isSideFacingReef(), 
@@ -259,26 +262,40 @@ public class RobotContainer {
             () -> ReefFace.FRONT_REEF_FACE, () -> new ChassisSpeeds(),() -> drivetrain.getClosestReefStalk() == ReefFace.FRONT_REEF_FACE.getLeftStalk(),() ->false);
             
         return new SequentialCommandGroup(
-            pathfindToPose(ReefFace.FRONT_RIGHT_REEF_FACE.getPose2d().plus(new Transform2d(1.5,0, new Rotation2d()))).alongWith(intake.defaultCommand(0)).until(
-                () -> Math.abs(ReefFace.FRONT_RIGHT_REEF_FACE.getPose2d().plus(new Transform2d(1.5,0, new Rotation2d())).minus(drivetrain.getPoseMeters()).getTranslation().getNorm()) < 0.5),
-            scoreOnClosestFace.until((scoreOnClosestFace::hasProblablyScored)),
+            pathfindToPose(ReefFace.FRONT_RIGHT_REEF_FACE.getPose2d().plus(new Transform2d(1.5,0, new Rotation2d().minus(Rotation2d.kCW_90deg)))).alongWith(intake.defaultCommand()).until(
+                () -> Math.abs(ReefFace.FRONT_RIGHT_REEF_FACE.getPose2d().plus(new Transform2d(1.5,0, new Rotation2d().minus(Rotation2d.kCW_90deg))).minus(drivetrain.getPoseMeters()).getTranslation().getNorm()) < 0.5),
+            l1ScoreInAuto(drivetrain,intake, () -> false, 
+            () -> ReefFace.FRONT_RIGHT_REEF_FACE, () -> new ChassisSpeeds(),() -> drivetrain.getClosestReefStalk() == drivetrain.getClosestReefFace().getLeftStalk(),() ->false),
 
-            pickUpLolipop(3,200.0,0.25).until(() -> intake.doesHaveACoral()).withTimeout(4),
-            scoreOnFront.until((scoreOnFront::hasProblablyScored)),
-
-            pickUpLolipop(2,150.0,-0.25).until(() -> intake.doesHaveACoral()).withTimeout(4),
-            scoreOnFront2.until((scoreOnFront2::hasProblablyScored)),
+            pickUpLolipop(3,270.0+50.0,0.3).until(() -> intake.doesHaveACoral()).withTimeout(4),
             
-            pickUpLolipop(1,150.0,-0.25).until(() -> intake.doesHaveACoral()).withTimeout(4),
-            scoreOnFront3.until((scoreOnFront3::hasProblablyScored))
+            l1ScoreInAuto(drivetrain,intake, () -> false, 
+            () -> ReefFace.FRONT_REEF_FACE, () -> new ChassisSpeeds(),() -> drivetrain.getClosestReefStalk() == ReefFace.FRONT_REEF_FACE.getLeftStalk(),() ->false),
+
+            pickUpLolipop(2,270.0-50.0,-0.3).until(() -> intake.doesHaveACoral()).withTimeout(4),
+            l1ScoreInAuto(drivetrain,intake, () -> false, 
+            () -> ReefFace.FRONT_REEF_FACE, () -> new ChassisSpeeds(),() -> drivetrain.getClosestReefStalk() == ReefFace.FRONT_REEF_FACE.getLeftStalk(),() ->false),
+            
+            pickUpLolipop(1,270.0-50.0,-0.3).until(() -> intake.doesHaveACoral()).withTimeout(4),
+            l1ScoreInAuto(drivetrain,intake, () -> drivetrain.isSideFacingReef(), 
+            () -> ReefFace.FRONT_REEF_FACE, () -> new ChassisSpeeds(),() -> drivetrain.getClosestReefStalk() == ReefFace.FRONT_REEF_FACE.getLeftStalk(),() ->false)
         );
     }
 
+    public Command l1ScoreInAuto(Drivetrain drivetrain, Intake intake, Supplier<Boolean> ifFacingReef, Supplier<ReefFace> faceScoringOn, 
+        Supplier<ChassisSpeeds> driverRequestedVel, Supplier<Boolean> isClosestStalkLeft, Supplier<Boolean> manualScoreOveride) {
+        L1Score score = new L1Score(drivetrain,intake, ifFacingReef, 
+            faceScoringOn, () -> new ChassisSpeeds(),isClosestStalkLeft,() ->false);
+        return score.until(score::hasProblablyScored);
+
+    }
+
     public Command pickUpLolipop(int lolipop, double wantedRotationDeg, double adjustedY) { 
+        
         // left it 1 mid is 2 right is 3
         StandardFieldElement lolipopGoingFor;
-        double firstX = 0.6;
-        double secondX = -0.3;
+        double firstX = 0.65;
+        double secondX = -0.2;
         // Rotation2d rotation = new Rotation2d();
         if (DriverStation.getAlliance().isPresent()){
             if(DriverStation.getAlliance().get() == Alliance.Red) {
@@ -304,9 +321,9 @@ public class RobotContainer {
         Logger.recordOutput("first loipop pose", firstPositionToGoTo);
 
         return new SequentialCommandGroup(
-            Commands.run(() -> drivetrain.pidToPose(firstPositionToGoTo, 2))
+            drivetrain.run(() -> drivetrain.pidToPose(firstPositionToGoTo, 2))
                 .alongWith(intake.intakeCommand()).until(() -> intake.isIntakeDown() && drivetrain.translationControllerAtSetpoint()),
-            intake.intakeCommand().alongWith(Commands.run(() -> drivetrain.pidToPose(
+            intake.intakeCommand().alongWith(drivetrain.run(() -> drivetrain.pidToPose(
                 secondPositionToGoTo , 2))).until(() -> intake.doesHaveACoral())
         );
     }
