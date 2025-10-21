@@ -26,7 +26,7 @@ import edu.wpi.first.math.util.Units;
  */
 public final class Constants {
 
-    public final static boolean atCompetition = true;
+    public final static boolean atCompetition = false;
 
     public final class UniversalConstants {
         public final static double gravityMetersPerSecondSquared = 9.81;
@@ -170,7 +170,7 @@ public final class Constants {
         public final static double kDClimbingLifterVoltsPerDegreePerSec = 0.0;
 
         public final static double aimAtCagePositionDeg = 0.0;
-        public final static double climbingPositionDeg = 105.0;
+        public final static double climbingPositionDeg = 108.0;
         public final static double climberStartingPositionDeg = 90.0;
         // 4:1, 4:1, 7:1, 42:15
         public final static double lifterGearReduction = (1.0 / 4.0) * (1.0 / 4.0) * (1.0 / 7.0) * (15.0 / 42.0);
@@ -216,7 +216,7 @@ public final class Constants {
         
         public final static double intakePivotSetpointDeg = -19.0;
         
-        public final static double noCoralPivotSetpointDeg = 70.0;
+        public final static double noCoralPivotSetpointDeg = 75.0;
         public final static double hasCoralPivotSetpointDeg = 95.0;
 
         // Gripper setpoints

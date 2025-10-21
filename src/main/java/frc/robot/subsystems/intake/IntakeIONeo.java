@@ -47,7 +47,7 @@ public class IntakeIONeo implements IntakeIO {
         
         // pivotNeo.getEncoder().setPosition(0.25/IntakeConstants.pivotGearReduction);
 
-        pivotNeo.getEncoder().setPosition(-19);
+        pivotNeo.getEncoder().setPosition(98.5);
 
         pivotConfigFollower = pivotConfig;
 

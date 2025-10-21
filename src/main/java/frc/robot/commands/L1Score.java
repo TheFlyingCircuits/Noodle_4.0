@@ -48,7 +48,7 @@ public class L1Score extends Command {
         if(isFacingForward){
             adjustedX += 0.125; // measure this manually
         } else {
-            adjustedX += -0.06;
+            adjustedX += -0.015;
         }
 
         double adjustedY;

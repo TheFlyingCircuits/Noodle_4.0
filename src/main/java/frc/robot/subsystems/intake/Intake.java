@@ -27,7 +27,7 @@ public class Intake extends SubsystemBase {
 
     PIDController pivotPID;
 
-    private double desiredPivotAngleDegrees = -19.0;
+    private double desiredPivotAngleDegrees = 98.5;
     private double desiredTopGripperVolts = 0.0;
     private double desiredBottomGripperVolts = 0.0;
 
@@ -81,13 +81,6 @@ public class Intake extends SubsystemBase {
             goToDesiredPivotAngle(currentlyIntaking);
         }
         setGripperVolts(inputs.desiredTopGripperVolts, inputs.desiredBottomGripperVolts);
-    }
-
-    public void feedForwardVel(double KvVoltsPerDegPerSec, double desiredDegPerSec) {
-        // pivotFeedForward.setKv(Units.degreesToRadians(KvVoltsPerDegPerSec));
-        double voltageOutput = pivotFeedForward.calculate(inputs.pivotAngleRadians, Units.degreesToRadians(desiredDegPerSec));
-        
-        setPivotVolts(voltageOutput);
     }
 
     public void setPivotVolts(double volts) {
@@ -172,7 +165,8 @@ public class Intake extends SubsystemBase {
 
     public void score(Supplier<Boolean> facingReef, boolean readyToScore, boolean manualOveride) {
         // this function needs to be called in a loop like execute or periodic
-        System.out.println("ijegiojweogijwoigjwiogej");
+        currentlyIntaking = false;
+        // System.out.println("ijegiojweogijwoigjwiogej");
         double scoringPivotDegrees = (facingReef.get()) ? IntakeConstants.frontScorePivotSetpointDeg : IntakeConstants.backScorePivotSetpointDeg; 
         double topGripperScoringVolts = (facingReef.get()) ? IntakeConstants.frontScoreTopGripperVolts : IntakeConstants.backScoreTopGripperVolts;
         double bottomGripperScoringVolts = (facingReef.get()) ? IntakeConstants.frontScoreBottomGripperVolts : IntakeConstants.backScoreBottomGripperVolts;
@@ -208,7 +202,7 @@ public class Intake extends SubsystemBase {
             if(isInIntakeFunction) {
                 desiredPivotAngleDegrees = IntakeConstants.hasCoralPivotSetpointDeg;
                 desiredBottomGripperVolts = 0;
-                desiredTopGripperVolts = -11;
+                desiredTopGripperVolts = -8;
                 return;
             }
             desiredPivotAngleDegrees = IntakeConstants.hasCoralPivotSetpointDeg;
@@ -238,9 +232,9 @@ public class Intake extends SubsystemBase {
             desiredTopGripperVolts = IntakeConstants.intakingTopGripperVolts;
             desiredBottomGripperVolts = IntakeConstants.intakingBottomGripperVolts;
             hasACoral = false;
-            // if (Math.abs(desiredPivotAngleDegrees - inputs.pivotAngleDegrees) < 3) {
-            //     shouldntAutoGoToPos = true;
-            // }
+             if (Math.abs(desiredPivotAngleDegrees - inputs.pivotAngleDegrees) < 3) {
+                 shouldntAutoGoToPos = true;
+            }
     }
 
     public void ejectCoral() {
@@ -255,14 +249,6 @@ public class Intake extends SubsystemBase {
 
     public Command setTargetAngleDegCommand(double degrees) {
         return this.run(() -> setPivotTargetAngleDegrees(degrees));
-    }
-
-    public Command setPivotVoltsCommand(double volts) {
-        return this.run(() -> setPivotVolts(volts));
-    }
-
-    public Command setGrippersVoltsCommand(double topGripperVolts, double bottomGripperVolts) {
-        return this.run(() -> setGripperVolts(topGripperVolts, bottomGripperVolts));
     }
 
     public Command defaultCommand() {
